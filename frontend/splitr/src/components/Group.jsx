@@ -4,7 +4,7 @@ import "./Group.css";
 
 function CreateGroup({ user }) {
   const [groupName, setGroupName] = useState("");
-  const [members, setMembers] = useState("");
+  const [selectedFriends, setSelectedFriends] = useState([]);
   const [loading, setLoading] = useState(false);
   const [friends, setFriends] = useState([]);
 
@@ -19,18 +19,16 @@ function CreateGroup({ user }) {
     }
   }, [user?._id]);
 
-  const memberList = members
-    .split(",")
-    .map((m) => m.trim())
-    .filter((m) => m !== "");
-
   const handleCreate = async () => {
     if (!groupName.trim()) {
       return alert("Enter group name");
     }
 
-    if (memberList.length === 0) {
-      return alert("Enter at least one member");
+    // Members list: Current user + selected friends
+    const finalMembers = [user.name, ...selectedFriends.map(f => f.name)];
+
+    if (finalMembers.length < 2) {
+      return alert("Add at least one friend to the group");
     }
 
     try {
@@ -43,7 +41,7 @@ function CreateGroup({ user }) {
         },
         body: JSON.stringify({
           name: groupName,
-          members: memberList,
+          members: finalMembers,
         }),
       });
 
@@ -52,9 +50,7 @@ function CreateGroup({ user }) {
       }
 
       const data = await res.json();
-
       localStorage.setItem("groupId", data._id);
-
       navigate(`/dashboard/${data._id}`);
     } catch (err) {
       console.error(err);
@@ -64,11 +60,11 @@ function CreateGroup({ user }) {
     }
   };
 
-  const toggleFriend = (friendName) => {
-    if (memberList.includes(friendName)) {
-      setMembers(memberList.filter(m => m !== friendName).join(", "));
+  const toggleFriend = (friend) => {
+    if (selectedFriends.some(f => f._id === friend._id)) {
+      setSelectedFriends(selectedFriends.filter(f => f._id !== friend._id));
     } else {
-      setMembers([...memberList, friendName].join(", "));
+      setSelectedFriends([...selectedFriends, friend]);
     }
   };
 
@@ -96,7 +92,7 @@ function CreateGroup({ user }) {
             </svg>
           </div>
           <h2 className="title">Create New Group</h2>
-          <p className="subtitle">Start splitting expenses smartly with your crew</p>
+          <p className="subtitle">Only followed friends can be added to the group</p>
         </div>
 
         {/* Divider */}
@@ -120,17 +116,19 @@ function CreateGroup({ user }) {
         </div>
 
         {/* Friends Selection */}
-        {friends.length > 0 && (
-          <div className="friends-selection">
-            <label className="friends-label">Quick Add Friends</label>
+        <div className="friends-selection">
+          <label className="friends-label">
+            {friends.length > 0 ? "Select Friends to Add" : "No friends found. Follow users in Settings first."}
+          </label>
+          {friends.length > 0 ? (
             <div className="friends-list-mini">
               {friends.map(friend => {
-                const isSelected = memberList.includes(friend.name);
+                const isSelected = selectedFriends.some(f => f._id === friend._id);
                 return (
                   <div 
                     key={friend._id} 
                     className={`friend-selectable ${isSelected ? 'selected' : ''}`}
-                    onClick={() => toggleFriend(friend.name)}
+                    onClick={() => toggleFriend(friend)}
                   >
                     <img 
                       src={friend.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.name}`} 
@@ -141,42 +139,48 @@ function CreateGroup({ user }) {
                 );
               })}
             </div>
-          </div>
-        )}
+          ) : (
+            <button 
+              className="back-btn" 
+              onClick={() => navigate('/settings')}
+              style={{marginTop: '5px', padding: '10px', background: '#eff6ff', color: '#1d4ed8'}}
+            >
+              Go to Settings to find friends
+            </button>
+          )}
+        </div>
 
-        <div className="form-group">
-          <label>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-              <circle cx="12" cy="7" r="4" />
-            </svg>
-            Members
-          </label>
-          <input
-            type="text"
-            placeholder="Sahil, Rahul, Amit"
-            value={members}
-            onChange={(e) => setMembers(e.target.value)}
-          />
-          <span className="hint">Separate names with commas</span>
+        {/* Members Label */}
+        <div className="form-group" style={{marginBottom: '10px'}}>
+             <label>
+               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                 <circle cx="12" cy="7" r="4" />
+               </svg>
+               Group Members
+             </label>
         </div>
 
         {/* Member preview chips */}
-        {memberList.length > 0 && (
-          <div className="member-preview">
-            {memberList.map((name, i) => (
-              <span key={i} className="member-chip">
-                <span className="chip-avatar">{name.charAt(0).toUpperCase()}</span>
-                {name}
-              </span>
-            ))}
-          </div>
-        )}
+        <div className="member-preview">
+          {/* Always include current user */}
+          <span className="member-chip" style={{borderColor: '#4361EE', background: '#EEF2FF'}}>
+            <span className="chip-avatar">YOU</span>
+            {user?.name} (Admin)
+          </span>
+          
+          {selectedFriends.map((friend) => (
+            <span key={friend._id} className="member-chip">
+              <span className="chip-avatar">{friend.name.charAt(0).toUpperCase()}</span>
+              {friend.name}
+            </span>
+          ))}
+        </div>
 
         <button
           className="create-btn"
           onClick={handleCreate}
-          disabled={loading}
+          disabled={loading || friends.length === 0}
         >
           {loading ? (
             <>
