@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 import UpiPaymentModal from "./UpiPaymentModal";
 import "./GroupDetail.css";
 
@@ -565,68 +565,97 @@ function GroupDetail({ user }) {
                 <p>All settled up! No pending balances.</p>
               </div>
             ) : (
-              <div className="gd-balance-list">
-                {netBalances.map((bal, i) => {
-                  const settleKey = `${bal.from}-${bal.to}`;
-                  const isSettling = settling === settleKey;
+              <div className="gd-settlement-container">
+                {/* 1. Visual Balance Map (Bar Chart) */}
+                <div className="gd-balance-chart-wrapper">
+                  <h4 className="gd-sub-title">Member Balances</h4>
+                  <ResponsiveContainer width="100%" height={200}>
+                    <BarChart
+                      layout="vertical"
+                      data={Object.entries(memberTotals).map(([name, data]) => ({
+                        name,
+                        balance: (data.owed - data.owes).toFixed(2)
+                      })).sort((a,b) => b.balance - a.balance)}
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                      <XAxis type="number" hide />
+                      <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} width={80} style={{fontSize: '0.75rem', fontWeight: 600}} />
+                      <Tooltip 
+                        formatter={(val) => [`₹${Math.abs(val)}`, val > 0 ? "Owed to them" : "They owe"]}
+                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                      />
+                      <ReferenceLine x={0} stroke="#cbd5e1" />
+                      <Bar 
+                        dataKey="balance" 
+                        radius={[0, 4, 4, 0]}
+                        barSize={18}
+                      >
+                        {Object.entries(memberTotals).map(([name, data], i) => (
+                           <Cell key={i} fill={(data.owed - data.owes) > 0 ? '#10B981' : '#EF4444'} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
 
-                  return (
-                    <div key={i} className="gd-balance-row">
-                      <div className="gd-balance-left">
-                        <div className="gd-balance-avatars">
-                          <div className="gd-balance-avatar gd-avatar-from">
-                            {bal.from.charAt(0).toUpperCase()}
+                <div className="gd-divider"></div>
+
+                {/* 2. Optimized Flow Cards */}
+                <div className="gd-flow-list">
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px'}}>
+                    <h4 className="gd-sub-title">Optimized Payment Paths</h4>
+                    <span className="gd-algo-badge">AI Optimized</span>
+                  </div>
+                  
+                  {netBalances.map((bal, i) => {
+                    const settleKey = `${bal.from}-${bal.to}`;
+                    const isSettling = settling === settleKey;
+
+                    return (
+                      <div key={i} className="gd-flow-card">
+                        <div className="gd-flow-main">
+                          <div className="gd-flow-user">
+                            <div className="flow-avatar from">{bal.from.charAt(0)}</div>
+                            <span>{bal.from}</span>
                           </div>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94A3B8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="gd-arrow-icon">
-                            <path d="M5 12h14" />
-                            <path d="M12 5l7 7-7 7" />
-                          </svg>
-                          <div className="gd-balance-avatar gd-avatar-to">
-                            {bal.to.charAt(0).toUpperCase()}
+                          
+                          <div className="gd-flow-arrow">
+                            <span className="flow-amt">₹{bal.amount.toFixed(0)}</span>
+                            <div className="arrow-line">
+                              <div className="arrow-head"></div>
+                            </div>
+                          </div>
+
+                          <div className="gd-flow-user">
+                            <div className="flow-avatar to">{bal.to.charAt(0)}</div>
+                            <span>{bal.to}</span>
                           </div>
                         </div>
-                        <div className="gd-balance-info">
-                          <span className="gd-balance-names">
-                            <strong>{bal.from}</strong> owes <strong>{bal.to}</strong>
-                          </span>
-                          <span className="gd-balance-amount">
-                            ₹{bal.amount.toFixed(2)}
-                          </span>
+
+                        <div className="gd-flow-actions">
+                          {bal.from.toLowerCase() === (currentUser || "").toLowerCase() && (
+                            <>
+                              <button
+                                className={`gd-btn-action-primary ${isSettling ? "settling" : ""}`}
+                                onClick={() => handleSettle(bal.from, bal.to, bal.amount)}
+                                disabled={isSettling}
+                              >
+                                {isSettling ? "..." : "Settle"}
+                              </button>
+                              <button
+                                className="gd-btn-action-upi"
+                                onClick={() => setUpiTarget({ from: bal.from, to: bal.to, amount: bal.amount })}
+                              >
+                                UPI ⚡
+                              </button>
+                            </>
+                          )}
                         </div>
                       </div>
-                      {bal.from.toLowerCase() === (currentUser || "").toLowerCase() && (
-                        <div className="gd-settle-actions">
-                          <button
-                            className={`gd-btn-settle ${isSettling ? "settling" : ""}`}
-                            onClick={() => handleSettle(bal.from, bal.to, bal.amount)}
-                            disabled={isSettling}
-                          >
-                            {isSettling ? (
-                              <>
-                                <span className="gd-btn-spinner"></span>
-                                Settling...
-                              </>
-                            ) : (
-                              <>
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12" />
-                                </svg>
-                                Settle
-                              </>
-                            )}
-                          </button>
-                          <button
-                            className="gd-btn-upi"
-                            onClick={() => setUpiTarget({ from: bal.from, to: bal.to, amount: bal.amount })}
-                            disabled={isSettling}
-                          >
-                            ⚡ Pay via UPI
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

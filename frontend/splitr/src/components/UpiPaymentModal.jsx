@@ -8,11 +8,7 @@ import {
 } from "../utils/upi";
 import "./UpiPaymentModal.css";
 
-/**
- * UPI Payment Modal
- * Shows UPI payment options with QR code for desktop, deep links for mobile,
- * and a confirmation flow after payment.
- */
+
 function UpiPaymentModal({ from, to, amount, groupId, onClose, onSettled }) {
   const [step, setStep] = useState("input"); // input | pay | confirm
   const [upiId, setUpiId] = useState("");
