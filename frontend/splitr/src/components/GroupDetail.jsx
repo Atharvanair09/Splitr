@@ -81,30 +81,45 @@ function GroupDetail({ user }) {
     // 1. First, calculate the net balance for each member (Total Paid - Total Owed)
     const netTotal = {};
     group.members.forEach((m) => {
-      netTotal[m] = 0;
+      netTotal[m.toLowerCase()] = 0;
     });
+
+    const findActualKey = (partialName) => {
+      if (!partialName) return null;
+      const lowerPartial = partialName.toLowerCase().trim();
+      let keys = Object.keys(netTotal);
+      if (keys.includes(lowerPartial)) return lowerPartial;
+      let match = keys.find(k => k.includes(lowerPartial));
+      if (match) return match;
+      match = keys.find(k => lowerPartial.includes(k));
+      if (match) return match;
+      return null;
+    };
 
     expenses.forEach((expense) => {
       const { paidBy, amount, splitBetween, splitDetails } = expense;
       if (!splitBetween || splitBetween.length === 0) return;
 
+      const payerKey = findActualKey(paidBy);
       // The person who paid gets credit for the full amount
-      if (netTotal[paidBy] !== undefined) {
-        netTotal[paidBy] += amount;
+      if (payerKey && netTotal[payerKey] !== undefined) {
+        netTotal[payerKey] += amount;
       }
 
       // Each member on the receiving end (owed part) gets a debit
       if (splitDetails && splitDetails.length > 0) {
         splitDetails.forEach((detail) => {
-          if (netTotal[detail.name] !== undefined) {
-            netTotal[detail.name] -= detail.amount;
+          const detailKey = findActualKey(detail.name);
+          if (detailKey && netTotal[detailKey] !== undefined) {
+            netTotal[detailKey] -= detail.amount;
           }
         });
       } else {
         const share = amount / splitBetween.length;
         splitBetween.forEach((person) => {
-          if (netTotal[person] !== undefined) {
-            netTotal[person] -= share;
+          const personKey = findActualKey(person);
+          if (personKey && netTotal[personKey] !== undefined) {
+            netTotal[personKey] -= share;
           }
         });
       }
@@ -115,7 +130,8 @@ function GroupDetail({ user }) {
     let creditors = []; // positive balance
 
     group.members.forEach((m) => {
-      const bal = netTotal[m];
+      const lowerM = m.toLowerCase();
+      const bal = netTotal[lowerM];
       if (bal < -0.01) {
         debtors.push({ name: m, amount: Math.abs(bal) });
       } else if (bal > 0.01) {
@@ -153,12 +169,13 @@ function GroupDetail({ user }) {
     // Member totals for UI display (summary cards)
     const memberTotals = {};
     group.members.forEach((m) => {
+      const lowerM = m.toLowerCase();
       const paid = expenses
-        .filter((e) => e.paidBy === m)
+        .filter((e) => findActualKey(e.paidBy) === lowerM)
         .reduce((sum, e) => sum + e.amount, 0);
       
       // Net can be derived from our netTotal calculation
-      const net = netTotal[m] || 0;
+      const net = netTotal[lowerM] || 0;
       
       memberTotals[m] = { 
         paid, 
@@ -182,28 +199,48 @@ function GroupDetail({ user }) {
 
     const mData = {};
     group.members.forEach(m => {
-      mData[m] = { name: m, paid: 0, share: 0 };
+      mData[m.toLowerCase()] = { name: m, paid: 0, share: 0 };
     });
+
+    const findMemberKey = (partialName) => {
+      if (!partialName) return null;
+      const lowerPartial = partialName.toLowerCase().trim();
+      let keys = Object.keys(mData);
+      if (keys.includes(lowerPartial)) return lowerPartial;
+      let match = keys.find(k => k.includes(lowerPartial));
+      if (match) return match;
+      match = keys.find(k => lowerPartial.includes(k));
+      if (match) return match;
+      return null;
+    };
+
+    const currentUserKey = findMemberKey(currentUser) || currentUser.toLowerCase();
 
     expenses.forEach(exp => {
       const amount = exp.amount || 0;
       const splitLen = exp.splitBetween?.length || 1;
       const splitAmount = amount / splitLen;
 
-      if (exp.paidBy && mData[exp.paidBy]) {
-        mData[exp.paidBy].paid += amount;
+      const payerKey = findMemberKey(exp.paidBy);
+      if (payerKey && mData[payerKey]) {
+        mData[payerKey].paid += amount;
       }
 
       if (exp.splitBetween) {
         exp.splitBetween.forEach(m => {
-          if (mData[m]) mData[m].share += splitAmount;
+          const memberKey = findMemberKey(m);
+          if (memberKey && mData[memberKey]) {
+            mData[memberKey].share += splitAmount;
+          }
         });
-        if (exp.splitBetween.includes(currentUser)) {
+        
+        const isCurrentUserInSplit = exp.splitBetween.some(m => findMemberKey(m) === currentUserKey);
+        if (isCurrentUserInSplit) {
           tShare += splitAmount;
         }
       }
 
-      if (exp.paidBy === currentUser) {
+      if (payerKey === currentUserKey) {
         tPaid += amount;
       }
     });
@@ -557,35 +594,36 @@ function GroupDetail({ user }) {
                           </span>
                         </div>
                       </div>
-
-                      <div className="gd-settle-actions">
-                        <button
-                          className={`gd-btn-settle ${isSettling ? "settling" : ""}`}
-                          onClick={() => handleSettle(bal.from, bal.to, bal.amount)}
-                          disabled={isSettling}
-                        >
-                          {isSettling ? (
-                            <>
-                              <span className="gd-btn-spinner"></span>
-                              Settling...
-                            </>
-                          ) : (
-                            <>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                              Settle
-                            </>
-                          )}
-                        </button>
-                        <button
-                          className="gd-btn-upi"
-                          onClick={() => setUpiTarget({ from: bal.from, to: bal.to, amount: bal.amount })}
-                          disabled={isSettling}
-                        >
-                          ⚡ Pay via UPI
-                        </button>
-                      </div>
+                      {bal.from.toLowerCase() === (currentUser || "").toLowerCase() && (
+                        <div className="gd-settle-actions">
+                          <button
+                            className={`gd-btn-settle ${isSettling ? "settling" : ""}`}
+                            onClick={() => handleSettle(bal.from, bal.to, bal.amount)}
+                            disabled={isSettling}
+                          >
+                            {isSettling ? (
+                              <>
+                                <span className="gd-btn-spinner"></span>
+                                Settling...
+                              </>
+                            ) : (
+                              <>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12" />
+                                </svg>
+                                Settle
+                              </>
+                            )}
+                          </button>
+                          <button
+                            className="gd-btn-upi"
+                            onClick={() => setUpiTarget({ from: bal.from, to: bal.to, amount: bal.amount })}
+                            disabled={isSettling}
+                          >
+                            ⚡ Pay via UPI
+                          </button>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
