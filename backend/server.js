@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const User = require("./models/User");
 const groupRoutes = require("./routes/groupRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -87,4 +88,10 @@ app.post("/api/auth/google", async (req, res) => {
 //Group routes
 
 app.use("/group", groupRoutes);
+
+//Expense routes
+
+
+
+app.use("/expense", expenseRoutes);
 

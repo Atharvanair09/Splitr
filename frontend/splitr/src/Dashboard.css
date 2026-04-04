@@ -85,17 +85,28 @@
   color: white;
   border: none;
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 700;
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(11, 19, 43, 0.25);
 }
 
 .btn-expense:hover {
   background: #152259;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(11, 19, 43, 0.35);
+}
+
+.btn-expense:active {
+  transform: translateY(0);
 }
 
 /* Main Content area */

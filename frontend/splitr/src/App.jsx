@@ -5,6 +5,7 @@ import Signup from './Signup';
 import Login from './Login';
 import Dashboard from './Dashboard';
 import CreateGroup from './components/Group';
+import AddExpense from "./components/AddExpense";
 
 function AuthLayout({ children }) {
   return (
@@ -74,6 +75,7 @@ function App() {
       <Route path="/dashboard" element={<Dashboard user={user} />} />
       <Route path="/dashboard/:id" element={<Dashboard user={user} />} />
       <Route path="/group" element={<CreateGroup />} />
+      <Route path="/add-expense/:groupId" element={<AddExpense />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
