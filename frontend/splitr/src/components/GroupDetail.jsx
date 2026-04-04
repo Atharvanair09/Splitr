@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import UpiPaymentModal from "./UpiPaymentModal";
 import "./GroupDetail.css";
 
 const MemberRow = ({ m, currentUser }) => {
@@ -72,94 +74,97 @@ function GroupDetail({ user }) {
     fetchData();
   }, [id]);
 
-  // Calculate balances: who owes whom
+  // Calculate balances using Minimum Cash Flow (Greedy Algorithm)
   const calculateBalances = () => {
-    // balances[A][B] = amount A owes B (positive = A owes B)
-    const balances = {};
-
     if (!group) return { netBalances: [], memberTotals: {} };
 
-    // Initialize all members
+    // 1. First, calculate the net balance for each member (Total Paid - Total Owed)
+    const netTotal = {};
     group.members.forEach((m) => {
-      balances[m] = {};
-      group.members.forEach((n) => {
-        if (m !== n) balances[m][n] = 0;
-      });
+      netTotal[m] = 0;
     });
 
-    // Process each expense
     expenses.forEach((expense) => {
-      const { paidBy, splitBetween, amount, splitDetails } = expense;
+      const { paidBy, amount, splitBetween, splitDetails } = expense;
       if (!splitBetween || splitBetween.length === 0) return;
 
-      // Use splitDetails if available (for uneven splits), otherwise fallback to equal split
+      // The person who paid gets credit for the full amount
+      if (netTotal[paidBy] !== undefined) {
+        netTotal[paidBy] += amount;
+      }
+
+      // Each member on the receiving end (owed part) gets a debit
       if (splitDetails && splitDetails.length > 0) {
         splitDetails.forEach((detail) => {
-          if (detail.name !== paidBy) {
-            const share = detail.amount;
-            if (balances[detail.name] && balances[detail.name][paidBy] !== undefined) {
-              balances[detail.name][paidBy] += share;
-            }
-            if (balances[paidBy] && balances[paidBy][detail.name] !== undefined) {
-              balances[paidBy][detail.name] -= share;
-            }
+          if (netTotal[detail.name] !== undefined) {
+            netTotal[detail.name] -= detail.amount;
           }
         });
       } else {
-        // Fallback to equal split
         const share = amount / splitBetween.length;
         splitBetween.forEach((person) => {
-          if (person !== paidBy) {
-            if (balances[person] && balances[person][paidBy] !== undefined) {
-              balances[person][paidBy] += share;
-            }
-            if (balances[paidBy] && balances[paidBy][person] !== undefined) {
-              balances[paidBy][person] -= share;
-            }
+          if (netTotal[person] !== undefined) {
+            netTotal[person] -= share;
           }
         });
       }
     });
 
-    // Simplify: net balances between each pair
-    const netBalances = [];
-    const processed = new Set();
+    // 2. Separate members into creditors and debtors
+    let debtors = []; // negative balance
+    let creditors = []; // positive balance
 
-    group.members.forEach((a) => {
-      group.members.forEach((b) => {
-        if (a === b) return;
-        const key = [a, b].sort().join("-");
-        if (processed.has(key)) return;
-        processed.add(key);
-
-        const aOwesB = balances[a]?.[b] || 0;
-        const bOwesA = balances[b]?.[a] || 0;
-        const net = aOwesB; // already net since we did += and -=
-
-        if (Math.abs(net) > 0.01) {
-          if (net > 0) {
-            netBalances.push({ from: a, to: b, amount: net });
-          } else {
-            netBalances.push({ from: b, to: a, amount: Math.abs(net) });
-          }
-        }
-      });
+    group.members.forEach((m) => {
+      const bal = netTotal[m];
+      if (bal < -0.01) {
+        debtors.push({ name: m, amount: Math.abs(bal) });
+      } else if (bal > 0.01) {
+        creditors.push({ name: m, amount: bal });
+      }
     });
 
-    // Member totals
+    // 3. Minimum Cash Flow (Greedy Algorithm)
+    const netBalances = [];
+    
+    // Sort so we always pick the maximum to settle first
+    debtors.sort((a, b) => b.amount - a.amount);
+    creditors.sort((a, b) => b.amount - a.amount);
+
+    let dIdx = 0;
+    let cIdx = 0;
+
+    while (dIdx < debtors.length && cIdx < creditors.length) {
+      let debtor = debtors[dIdx];
+      let creditor = creditors[cIdx];
+      
+      let settleAmount = Math.min(debtor.amount, creditor.amount);
+      
+      if (settleAmount > 0.01) {
+        netBalances.push({ from: debtor.name, to: creditor.name, amount: settleAmount });
+      }
+
+      debtor.amount -= settleAmount;
+      creditor.amount -= settleAmount;
+
+      if (debtor.amount < 0.01) dIdx++;
+      if (creditor.amount < 0.01) cIdx++;
+    }
+
+    // Member totals for UI display (summary cards)
     const memberTotals = {};
     group.members.forEach((m) => {
       const paid = expenses
         .filter((e) => e.paidBy === m)
         .reduce((sum, e) => sum + e.amount, 0);
-      const owes = netBalances
-        .filter((b) => b.from === m)
-        .reduce((sum, b) => sum + b.amount, 0);
-      const owed = netBalances
-        .filter((b) => b.to === m)
-        .reduce((sum, b) => sum + b.amount, 0);
-
-      memberTotals[m] = { paid, owes, owed };
+      
+      // Net can be derived from our netTotal calculation
+      const net = netTotal[m] || 0;
+      
+      memberTotals[m] = { 
+        paid, 
+        owes: net < 0 ? Math.abs(net) : 0, 
+        owed: net > 0 ? net : 0 
+      };
     });
 
     return { netBalances, memberTotals };

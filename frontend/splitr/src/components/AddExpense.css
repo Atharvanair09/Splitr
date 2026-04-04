@@ -401,3 +401,81 @@
     padding: 1.5rem;
   }
 }
+/* ── AI Parsed Card ── */
+.expense-parsed-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e0e7ff;
+  background: white !important;
+  border-radius: 16px;
+  padding: 20px;
+  margin-left: 10px;
+  animation: cardSlideUp 0.4s ease;
+  color: #1e293b !important;
+}
+
+.expense-parsed-card::before {
+  content: '✨ AI POWERED';
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 0.6rem;
+  font-weight: 900;
+  color: #4361EE;
+  background: #EEF2FF;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.epc-amount {
+  background: linear-gradient(135deg, #0F172A 0%, #4361EE 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+  margin: 10px 0 5px 0;
+  font-size: 1.8rem;
+}
+
+.epc-category {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.epc-confidence {
+  font-size: 0.65rem;
+  color: #10B981;
+  font-weight: 600;
+  margin-left: 10px;
+}
+
+.epc-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.epc-row:last-child {
+  border-bottom: none;
+}
+
+.epc-row label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94A3B8;
+  text-transform: uppercase;
+}
+
+.epc-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1E293B;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

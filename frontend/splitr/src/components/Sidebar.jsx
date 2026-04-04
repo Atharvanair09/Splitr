@@ -26,11 +26,6 @@ function Sidebar({ activePage, children }) {
           Activity
         </Link>
 
-        <span className={`sidebar-nav-item ${activePage === 'insights' ? 'active' : ''}`}>
-          <span className="sidebar-nav-icon">✨</span>
-          AI Insights
-        </span>
-
         <Link to="/settings" className={`sidebar-nav-item ${activePage === 'settings' ? 'active' : ''}`}>
           <span className="sidebar-nav-icon">⚙️</span>
           Settings

@@ -333,7 +333,7 @@ function Settings({ user, onLogout }) {
             </div>
 
             {/* Payment & Ledger */}
-            <div className="settings-section">
+            {/* <div className="settings-section">
               <div className="section-header">
                 <div>
                   <h3>Payment & Ledger</h3>
@@ -368,7 +368,7 @@ function Settings({ user, onLogout }) {
               <div className="pl-footer">
                 02 ACTIVE ACCOUNTS LINKED
               </div>
-            </div>
+            </div> */}
 
             {/* Bottom Footer Options */}
             <div className="settings-footer">

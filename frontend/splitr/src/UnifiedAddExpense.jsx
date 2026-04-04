@@ -15,6 +15,19 @@ function UnifiedAddExpense({ user, onLogout }) {
   const [splitDetails, setSplitDetails] = useState([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [groupMembers, setGroupMembers] = useState([]);
+
+  // Fetch group members if id exists
+  React.useEffect(() => {
+    if (id) {
+      fetch(`http://localhost:5000/group/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.members) setGroupMembers(data.members);
+        })
+        .catch(err => console.error("Error fetching group members:", err));
+    }
+  }, [id]);
 
   const memberList = splitBetween
     .split(",")
@@ -55,23 +68,32 @@ function UnifiedAddExpense({ user, onLogout }) {
           model: "openai/gpt-3.5-turbo",
           messages: [{
             role: "system",
-            content: `You are an AI expense parser with critical thinking for fair splitting. 
-Extract expense details from natural language. 
-IMPORTANT: If the user describes an uneven split (e.g. "I paid 1000 but I ate for 200, Rahul for 400, and Amit for 400"), you MUST calculate individual amounts.
-If they say "split equally" or do not mention at all, divide the total.
-Return ONLY valid JSON:
+            content: `You are an AI expense parser for the app "Splitr".
+Your goal is to extract expense details from natural language and return a structured JSON.
+
+--- CONTEXT ---
+${id ? `The user is adding an expense to the group: "${id}". 
+The group members are: ${groupMembers.join(", ")}. 
+Try to map any mentioned names in the input to these specific members.` : "No group context provided yet."}
+
+--- RULES ---
+1. Extract "amount", "title", "paidBy", and "between".
+2. If the user describes an uneven split (e.g. "I paid 1000, Rahul owes 200, Amit owes 800"), calculate individual amounts.
+3. If they say "split equally", divide the amount among the "between" list.
+4. "paidBy" must be ONE name. "between" must be an ARRAY of names.
+5. Return ONLY valid JSON:
 {
-  "category": "e.g. FOOD & DRINK",
+  "category": "e.g. DINING, TRAVEL, GROCERIES",
   "amount": number,
   "currency": "₹",
   "title": "short relevant title",
   "confidence": number 0-100,
-  "paidBy": "person who paid",
+  "paidBy": "string (name)",
   "splitType": "Uneven" or "Equal",
-  "between": ["person1", "person2"],
+  "between": ["name1", "name2"],
   "splitDetails": [
-    {"name": "person1", "amount": 200},
-    {"name": "person2", "amount": 800}
+    {"name": "name1", "amount": 200},
+    {"name": "name2", "amount": 800}
   ]
 }`
           }, {
@@ -300,14 +322,21 @@ Return ONLY valid JSON:
               </div>
 
               {/* Chat Input Field Bottom */}
-              <div className="chat-input-bar" style={{borderBottomRightRadius: '16px', borderBottomLeftRadius: '16px', border: 'none', borderTop: '1px solid #e2e8f0', boxShadow: 'none', background: 'transparent'}}>
+              <div className="chat-input-bar" style={{borderBottomRightRadius: '16px', borderBottomLeftRadius: '16px', border: 'none', borderTop: '1px solid #e2e8f0', boxShadow: 'none', background: 'transparent', display: 'flex', alignItems: 'center'}}>
+                <button 
+                  className="chat-voice-btn"
+                  title="Voice Input (Hackathon Mode)"
+                  onClick={() => alert("Simulating Voice Transcription... 'I paid 500 for drinks and split it with Rahul.'")}
+                  style={{background: 'none', border: 'none', color: '#4361EE', cursor: 'pointer', fontSize: '1.2rem', padding: '0 10px'}}
+                >🎤</button>
                 <input 
                   type="text" 
-                  placeholder="Type your expense..." 
+                  placeholder={id ? `Splitting in "${id}"...` : "Type your expense..."} 
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyPress}
                   disabled={isChatLoading}
+                  style={{paddingLeft: '10px'}}
                 />
                 <button className="chat-send-btn" onClick={handleSend} disabled={isChatLoading}>→</button>
               </div>
