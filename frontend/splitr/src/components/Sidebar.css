@@ -1,0 +1,116 @@
+.sidebar {
+  width: 260px;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 35px 20px;
+  border-right: 1px solid #f1f5f9;
+  z-index: 10;
+  flex-shrink: 0; 
+  height: 100vh;
+}
+
+.sidebar-brand-wrapper {
+  margin-bottom: 50px;
+  padding-left: 10px;
+}
+
+.sidebar-brand-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0b132b;
+  letter-spacing: -0.5px;
+}
+
+.sidebar-brand-subtitle {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 1px;
+  display: block;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.sidebar-nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex-grow: 1;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 14px 16px;
+  color: #475569;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sidebar-nav-item:hover {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+.sidebar-nav-item.active {
+  background-color: #eff6ff; 
+  color: #0b132b;
+  font-weight: 700;
+}
+
+.sidebar-nav-icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-footer-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: auto;
+}
+
+.sidebar-btn-expense {
+  background-color: #0b132b;
+  color: #fff;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.sidebar-btn-expense:hover {
+  background-color: #1a2961;
+}
+
+.sidebar-btn-signout {
+  background: none;
+  border: none;
+  color: #ef4444;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-transform: uppercase;
+}

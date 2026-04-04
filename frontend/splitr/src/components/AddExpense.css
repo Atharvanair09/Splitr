@@ -5,7 +5,7 @@
   flex-direction: column;
   align-items: center;
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
   background: #F4F6FF;
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
@@ -17,8 +17,6 @@
   from { opacity: 0; }
   to { opacity: 1; }
 }
-
-
 
 /* ── Top Bar ── */
 .expense-top-bar {
@@ -51,7 +49,9 @@
 
 /* ── Form Card ── */
 .expense-form-card {
-  background: white;
+  /* background: white; */
+  background: #0B132B;
+  color: white;
   border-radius: 16px;
   padding: 2.5rem;
   box-shadow:
@@ -79,7 +79,7 @@
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: #0B132B;
+  /* background: #0B132B; */
   color: white;
   display: flex;
   align-items: center;
@@ -90,14 +90,14 @@
 .expense-title {
   font-size: 1.5rem;
   font-weight: 800;
-  color: #0B132B;
+  color:white;
   margin: 0 0 2px 0;
   letter-spacing: -0.02em;
 }
 
 .expense-subtitle {
   font-size: 0.82rem;
-  color: #94A3B8;
+  color: white;
   margin: 0;
   font-weight: 400;
 }
@@ -111,7 +111,7 @@
 /* ── Labels ── */
 .expense-label {
   font-size: 0.72rem;
-  color: #475569;
+  color: white;
   margin-bottom: 8px;
   font-weight: 700;
   text-transform: uppercase;
@@ -123,7 +123,7 @@
 
 .optional-tag {
   font-size: 0.62rem;
-  color: #94A3B8;
+  color: white;
   font-weight: 500;
   text-transform: none;
   letter-spacing: 0;
@@ -146,15 +146,15 @@
 }
 
 .amount-input-wrapper:focus-within {
-  border-color: #4361EE;
-  box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.08);
+  border-color: black;
+  box-shadow: 0 0 0 4px rgb(132, 154, 252);
   background: white;
 }
 
 .currency-symbol {
   font-size: 1.8rem;
   font-weight: 800;
-  color: #CBD5E1;
+  color: #171414;
   padding: 0 12px 0 16px;
   user-select: none;
 }
@@ -341,7 +341,6 @@
 .expense-submit-btn {
   width: 100%;
   padding: 15px;
-  background: #0B132B;
   color: white;
   border: none;
   border-radius: 12px;
@@ -360,7 +359,7 @@
 }
 
 .expense-submit-btn:hover:not(:disabled) {
-  background: #152259;
+  background: white ;
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(11, 19, 43, 0.3);
 }

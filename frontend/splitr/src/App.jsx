@@ -5,12 +5,14 @@ import Signup from './Signup';
 import Login from './Login';
 import Dashboard from './Dashboard';
 import CreateGroup from './components/Group';
-import AddExpense from "./components/AddExpense";
-import GroupDetail from "./components/GroupDetail";
+import GroupDetail from './components/GroupDetail';
+import Account from './Account';
+import Settings from './Settings';
+import UnifiedAddExpense from './UnifiedAddExpense';
 
 function AuthLayout({ children }) {
   return (
-    <>
+    <div className="auth-page-wrapper">
       <div className="page-border" style={{ borderColor: '#6C48F5' }}></div>
       <div className="page-border" style={{ borderWidth: '4px', borderStyle: 'solid', borderColor: '#4361EE' }}></div>
       
@@ -43,7 +45,7 @@ function AuthLayout({ children }) {
           <a href="#">Global Compliance</a>
         </div>
       </footer>
-    </>
+    </div>
   );
 }
 
@@ -76,7 +78,10 @@ function App() {
       <Route path="/dashboard" element={<Dashboard user={user} />} />
       <Route path="/dashboard/:id" element={<GroupDetail user={user} />} />
       <Route path="/group" element={<CreateGroup />} />
-      <Route path="/add-expense/:groupId" element={<AddExpense />} />
+      <Route path="/account" element={<Account user={user} />} />
+      <Route path="/settings" element={<Settings user={user} />} />
+      <Route path="/activity" element={<UnifiedAddExpense user={user} />} />
+      <Route path="/add-expense/:id" element={<UnifiedAddExpense user={user} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
