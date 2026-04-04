@@ -4,10 +4,12 @@ import './Settings.css';
 import Sidebar from './components/Sidebar';
 
 function Settings({ user, onLogout }) {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState([]);
   const [friends, setFriends] = React.useState([]);
   const [searching, setSearching] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   // Fetch friends on mount
   React.useEffect(() => {
@@ -25,13 +27,21 @@ function Settings({ user, onLogout }) {
       if (searchQuery.length > 1) {
         setSearching(true);
         fetch(`http://localhost:5000/api/users/search?query=${searchQuery}&currentUserId=${user?._id}`)
-          .then(res => res.json())
+          .then(async (res) => {
+            if (!res.ok) {
+              const errData = await res.json();
+              throw new Error(errData.error || "Search failed");
+            }
+            return res.json();
+          })
           .then(data => {
             setSearchResults(data);
             setSearching(false);
+            setError(null);
           })
           .catch(err => {
             console.error("Search error:", err);
+            setError(`Error: ${err.message}`);
             setSearching(false);
           });
       } else {
@@ -228,6 +238,10 @@ function Settings({ user, onLogout }) {
                 )}
                 
                 {searching && <div style={{fontSize: '0.8rem', color: '#64748b', paddingLeft: '10px'}}>Searching database...</div>}
+                {error && <div style={{fontSize: '0.8rem', color: '#ef4444', paddingLeft: '10px'}}>{error}</div>}
+                {!searching && !error && searchQuery.length > 1 && searchResults.length === 0 && (
+                   <div style={{fontSize: '0.8rem', color: '#64748b', paddingLeft: '10px'}}>No users found matching "{searchQuery}".</div>
+                )}
 
                 {/* Following List */}
                 {friends.length > 0 && (

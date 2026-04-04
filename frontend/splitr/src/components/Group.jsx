@@ -1,13 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Group.css";
 
-function CreateGroup() {
+function CreateGroup({ user }) {
   const [groupName, setGroupName] = useState("");
   const [members, setMembers] = useState("");
   const [loading, setLoading] = useState(false);
+  const [friends, setFriends] = useState([]);
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user?._id) {
+      fetch(`http://localhost:5000/api/users/friends/${user._id}`)
+        .then(res => res.json())
+        .then(data => setFriends(data))
+        .catch(err => console.error("Error fetching friends:", err));
+    }
+  }, [user?._id]);
 
   const memberList = members
     .split(",")
@@ -51,6 +61,14 @@ function CreateGroup() {
       alert("Error creating group");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const toggleFriend = (friendName) => {
+    if (memberList.includes(friendName)) {
+      setMembers(memberList.filter(m => m !== friendName).join(", "));
+    } else {
+      setMembers([...memberList, friendName].join(", "));
     }
   };
 
@@ -100,6 +118,31 @@ function CreateGroup() {
             onChange={(e) => setGroupName(e.target.value)}
           />
         </div>
+
+        {/* Friends Selection */}
+        {friends.length > 0 && (
+          <div className="friends-selection">
+            <label className="friends-label">Quick Add Friends</label>
+            <div className="friends-list-mini">
+              {friends.map(friend => {
+                const isSelected = memberList.includes(friend.name);
+                return (
+                  <div 
+                    key={friend._id} 
+                    className={`friend-selectable ${isSelected ? 'selected' : ''}`}
+                    onClick={() => toggleFriend(friend.name)}
+                  >
+                    <img 
+                      src={friend.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.name}`} 
+                      alt={friend.name} 
+                    />
+                    <span>{friend.name.split(' ')[0]}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         <div className="form-group">
           <label>

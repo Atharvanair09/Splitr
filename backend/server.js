@@ -102,26 +102,28 @@ app.use("/api/payment", paymentRoutes);
 app.get("/api/users/search", async (req, res) => {
   try {
     const { query, currentUserId } = req.query;
+    console.log(`Search request: query="${query}", currentUserId="${currentUserId}"`);
     
     if (!query || query.length < 2) {
       return res.json([]);
     }
 
-    // Find users by name or email, excluding the current user
-    const users = await User.find({
-      $and: [
-        { _id: { $ne: currentUserId } },
-        {
-          $or: [
-            { name: { $regex: query, $options: "i" } },
-            { email: { $regex: query, $options: "i" } }
-          ]
-        }
+    const searchFilter = {
+      $or: [
+        { name: { $regex: query, $options: "i" } },
+        { email: { $regex: query, $options: "i" } }
       ]
-    }).limit(10).select("name email picture");
+    };
 
+    if (currentUserId && mongoose.Types.ObjectId.isValid(currentUserId)) {
+      searchFilter._id = { $ne: currentUserId };
+    }
+
+    const users = await User.find(searchFilter).limit(10);
+    console.log(`Found ${users.length} users matching "${query}"`);
     res.json(users);
   } catch (err) {
+    console.error("Search API Error:", err);
     res.status(500).json({ error: err.message });
   }
 });
