@@ -14,6 +14,9 @@ function Dashboard({ user }) {
   const [showInsightsModal, setShowInsightsModal] = useState(false);
   const [selectedInsightGroupId, setSelectedInsightGroupId] = useState(null);
   const [deleting, setDeleting] = useState(null);
+  const [joinCode, setJoinCode] = useState("");
+  const [joining, setJoining] = useState(false);
+  const [showJoinInput, setShowJoinInput] = useState(false);
 
   // Delete group handler
   const handleDeleteGroup = async (e, groupId, groupName) => {
@@ -39,17 +42,19 @@ function Dashboard({ user }) {
 
   // Fetch groups and expenses on mount
   useEffect(() => {
+    if (!user?.name) return;
+
     const fetchData = async () => {
       try {
         setLoading(true);
 
-        // Fetch all groups
-        const groupsRes = await fetch("http://localhost:5000/group/all");
+        // Fetch groups where user is a member
+        const groupsRes = await fetch(`http://localhost:5000/group/user/${user.name}`);
         const groupsData = await groupsRes.json();
         setGroups(groupsData);
 
-        // Fetch recent expenses
-        const expensesRes = await fetch("http://localhost:5000/expense/all");
+        // Fetch recent expenses for groups user is in
+        const expensesRes = await fetch(`http://localhost:5000/expense/user/${user.name}`);
         const expensesData = await expensesRes.json();
         setExpenses(expensesData);
 
@@ -61,7 +66,36 @@ function Dashboard({ user }) {
     };
 
     fetchData();
-  }, []);
+  }, [user?.name]);
+
+  const handleJoinGroup = async () => {
+    if (!joinCode.trim()) return;
+    setJoining(true);
+    try {
+      const res = await fetch("http://localhost:5000/group/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ joinCode: joinCode.trim(), userName: user.name })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setJoinCode("");
+        setShowJoinInput(false);
+        // Refresh groups
+        const groupsRes = await fetch(`http://localhost:5000/group/user/${user.name}`);
+        const groupsData = await groupsRes.json();
+        setGroups(groupsData);
+        alert(`Joined ${data.group.name}!`);
+      } else {
+        alert(data.message || "Failed to join group");
+      }
+    } catch (err) {
+      console.error("Join error:", err);
+      alert("Error joining group");
+    } finally {
+      setJoining(false);
+    }
+  };
 
   // Calculate totals from real expenses
   const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -107,12 +141,36 @@ function Dashboard({ user }) {
             <input type="text" placeholder="Search groups, expenses..." />
           </div>
           
-          <div className="header-nav">
+          {/* <div className="header-nav">
             <span>Settle Up</span>
             <span>Remind</span>
-          </div>
+          </div> */}
 
           <div className="header-actions">
+            {showJoinInput ? (
+              <div style={{display: 'flex', gap: '5px', alignItems: 'center'}}>
+                <input 
+                  type="text" 
+                  placeholder="Enter Code..." 
+                  value={joinCode} 
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  style={{padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.8rem', width: '100px'}}
+                />
+                <button onClick={handleJoinGroup} disabled={joining} style={{background: '#10b981', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '6px', fontSize: '0.8rem', cursor: 'pointer'}}>
+                  {joining ? "..." : "Join"}
+                </button>
+                <button onClick={() => setShowJoinInput(false)} style={{background: 'none', border: 'none', color: '#64748b', fontSize: '0.8rem', cursor: 'pointer'}}>✕</button>
+              </div>
+            ) : (
+              <button 
+                className="btn-new-group"
+                style={{background: '#EEF2FF', color: '#4361EE', border: '1px solid #DBEAFE', marginRight: '8px'}}
+                onClick={() => setShowJoinInput(true)}
+              >
+                Join Group
+              </button>
+            )}
+
             <button 
               className="btn-new-group"
               onClick={() => navigate("/group")}
@@ -120,7 +178,7 @@ function Dashboard({ user }) {
               New Group
             </button>
 
-            <span style={{ fontSize: '1.2rem', color: '#64748B' }}>🔔</span>
+            {/* <span style={{ fontSize: '1.2rem', color: '#64748B' }}>🔔</span> */}
 
             <div 
               className="user-profile" 

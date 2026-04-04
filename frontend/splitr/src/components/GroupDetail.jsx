@@ -255,6 +255,24 @@ function GroupDetail({ user }) {
 
 
   // Total group spend
+  // Handle Delete Group
+  const handleDeleteGroup = async () => {
+    if (window.confirm("Are you sure you want to delete this group? This will remove all associated expenses and cannot be undone.")) {
+      try {
+        const res = await fetch(`http://localhost:5000/group/${id}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+           navigate('/dashboard');
+        } else {
+           alert("Failed to delete group");
+        }
+      } catch (err) {
+        console.error("Delete error:", err);
+      }
+    }
+  };
+
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   // Handle settle
@@ -410,6 +428,10 @@ function GroupDetail({ user }) {
           </svg>
           Add Expense
         </button>
+
+        <button className="gd-btn-delete" onClick={handleDeleteGroup} style={{marginLeft: 'auto', background: '#fee2e2', color: '#ef4444', border: '1px solid #fecaca', padding: '8px 16px', borderRadius: '8px', fontSize: '0.8rem', fontWeight: '700', cursor: 'pointer'}}>
+          Delete Group
+        </button>
       </div>
 
       {/* Group Header Card */}
@@ -419,6 +441,11 @@ function GroupDetail({ user }) {
           <p className="gd-group-meta">
             {group.members.length} Members • Created {timeAgo(group.createdAt)}
           </p>
+          <div className="gd-join-code" style={{marginTop: '10px', background: '#eff6ff', padding: '6px 12px', borderRadius: '6px', border: '1px solid #dbeafe', display: 'inline-flex', alignItems: 'center', gap: '8px', cursor: 'pointer'}} onClick={() => {navigator.clipboard.writeText(group.joinCode); alert("Code copied!")}}>
+             <span style={{fontSize: '0.7rem', color: '#64748b', fontWeight: '600', textTransform: 'uppercase'}}>Join Code:</span>
+             <span style={{fontSize: '0.9rem', fontWeight: '800', color: '#4361EE'}}>{group.joinCode}</span>
+             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#4361ee" strokeWidth="2.5"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </div>
         </div>
         <div className="gd-header-stats">
           <div className="gd-stat">

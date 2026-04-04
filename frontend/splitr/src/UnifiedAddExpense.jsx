@@ -15,19 +15,42 @@ function UnifiedAddExpense({ user, onLogout }) {
   const [splitDetails, setSplitDetails] = useState([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userGroups, setUserGroups] = useState([]);
+  const [selectedGroupId, setSelectedGroupId] = useState(id || "");
   const [groupMembers, setGroupMembers] = useState([]);
 
-  // Fetch group members if id exists
+  // 1. Fetch available groups on mount
   React.useEffect(() => {
-    if (id) {
-      fetch(`http://localhost:5000/group/${id}`)
+    if (user?.name) {
+      fetch(`http://localhost:5000/group/user/${user.name}`)
+        .then(res => res.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+             setUserGroups(data);
+             // If we're coming from a specific group, pre-select it
+             if (id) {
+                setSelectedGroupId(id);
+             } else if (data.length > 0) {
+                // If not, default to the first group
+                setSelectedGroupId(data[0]._id);
+             }
+          }
+        })
+        .catch(err => console.error("Error fetching user groups:", err));
+    }
+  }, [user?.name, id]);
+
+  // 2. Fetch members of the selected group
+  React.useEffect(() => {
+    if (selectedGroupId && selectedGroupId !== "1") {
+      fetch(`http://localhost:5000/group/${selectedGroupId}`)
         .then(res => res.json())
         .then(data => {
           if (data && data.members) setGroupMembers(data.members);
         })
         .catch(err => console.error("Error fetching group members:", err));
     }
-  }, [id]);
+  }, [selectedGroupId]);
 
   const memberList = splitBetween
     .split(",")
@@ -37,6 +60,17 @@ function UnifiedAddExpense({ user, onLogout }) {
   const perPerson = memberList.length > 0 && amount
     ? (parseFloat(amount) / memberList.length).toFixed(2)
     : null;
+
+  // 3. Filter groups based on the "Split Between" member list
+  const filteredGroups = React.useMemo(() => {
+    if (memberList.length === 0) return userGroups;
+    return userGroups.filter(group => {
+      // Check if every member in the AI list is found in this group's members
+      return memberList.every(person => 
+        group.members.some(m => m.toLowerCase() === person.toLowerCase() || m.toLowerCase().includes(person.toLowerCase()))
+      );
+    });
+  }, [userGroups, memberList]);
 
   // --- CHAT STATE ---
   const [messages, setMessages] = useState([
@@ -72,13 +106,15 @@ function UnifiedAddExpense({ user, onLogout }) {
 Your goal is to extract expense details from natural language and return a structured JSON.
 
 --- CONTEXT ---
+Currently logged in user is: "${user?.name || 'Unknown User'}".
 ${id ? `The user is adding an expense to the group: "${id}". 
 The group members are: ${groupMembers.join(", ")}. 
 Try to map any mentioned names in the input to these specific members.` : "No group context provided yet."}
 
 --- RULES ---
 1. Extract "amount", "title", "paidBy", and "between".
-2. If the user describes an uneven split (e.g. "I paid 1000, Rahul owes 200, Amit owes 800"), calculate individual amounts.
+2. IMPORTANT: If the user uses first-person pronouns (e.g., "I paid", "me", "my share"), map them TO THE CURRENT USER'S NAME: "${user?.name}".
+3. If the user describes an uneven split (e.g. "I paid 1000, Rahul owes 200, Amit owes 800"), calculate individual amounts.
 3. If they say "split equally", divide the amount among the "between" list.
 4. "paidBy" must be ONE name. "between" must be an ARRAY of names.
 5. Return ONLY valid JSON:
@@ -137,12 +173,11 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
   const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
 
   const handleSubmit = async () => {
-    if (!amount || !paidBy || !splitBetween) {
-      return alert("Please ensure Amount, Paid By, and Split Between fields are correctly filled.");
+    if (!amount || !paidBy || !splitBetween || !selectedGroupId) {
+      return alert("Please ensure Group, Amount, Paid By, and Split Between fields are correctly filled.");
     }
     
-    // Using group ID from route param or fallback to a hardcoded logic
-    const groupId = id || '1'; // In production, users would select a group if coming from /activity
+    const groupId = selectedGroupId;
 
     try {
       setLoading(true);
@@ -164,8 +199,8 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
 
       if (!res.ok) throw new Error();
 
-      if(id) {
-         navigate(`/dashboard/${id}`);
+      if(groupId) {
+         navigate(`/dashboard/${groupId}`);
       } else {
          navigate(`/dashboard`);
       }
@@ -323,12 +358,12 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
 
               {/* Chat Input Field Bottom */}
               <div className="chat-input-bar" style={{borderBottomRightRadius: '16px', borderBottomLeftRadius: '16px', border: 'none', borderTop: '1px solid #e2e8f0', boxShadow: 'none', background: 'transparent', display: 'flex', alignItems: 'center'}}>
-                <button 
+                {/* <button 
                   className="chat-voice-btn"
                   title="Voice Input (Hackathon Mode)"
                   onClick={() => alert("Simulating Voice Transcription... 'I paid 500 for drinks and split it with Rahul.'")}
                   style={{background: 'none', border: 'none', color: '#4361EE', cursor: 'pointer', fontSize: '1.2rem', padding: '0 10px'}}
-                >🎤</button>
+                >🎤</button> */}
                 <input 
                   type="text" 
                   placeholder={id ? `Splitting in "${id}"...` : "Type your expense..."} 
@@ -359,6 +394,32 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
               </div>
 
               <div className="expense-divider"></div>
+
+              {/* Group Selection */}
+              <div className="expense-field" style={{marginBottom: '20px'}}>
+                <label className="expense-label">Target Group</label>
+                <select 
+                  className="expense-input" 
+                  value={selectedGroupId}
+                  onChange={(e) => setSelectedGroupId(e.target.value)}
+                  style={{width: '100%', appearance: 'auto', padding: '10px'}}
+                >
+                  <option value="" disabled>Select a group...</option>
+                  {filteredGroups.map(g => (
+                    <option key={g._id} value={g._id}>{g.name}</option>
+                  ))}
+                </select>
+                {memberList.length > 0 && filteredGroups.length === 0 && (
+                  <span style={{fontSize: '0.65rem', color: '#ef4444', fontWeight: 600, marginTop: '4px'}}>
+                    ⚠ No groups found with all these members!
+                  </span>
+                )}
+                {id && (
+                  <span style={{fontSize: '0.65rem', color: '#10B981', fontWeight: 600, marginTop: '4px'}}>
+                    ✓ Auto-selected from Group Page
+                  </span>
+                )}
+              </div>
 
               {/* Amount */}
               <div className="expense-amount-section">
