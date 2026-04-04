@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar';
 import './Activity.css';
 import './components/AddExpense.css';
 
-function UnifiedAddExpense({ user }) {
+function UnifiedAddExpense({ user, onLogout }) {
   const navigate = useNavigate();
   const { id } = useParams();
 
@@ -174,7 +174,10 @@ function UnifiedAddExpense({ user }) {
               </button>
             )}
             <div className="user-profile">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="Profile" />
+              <img 
+                src={user?.picture || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} 
+                alt="Profile" 
+              />
             </div>
           </div>
         </header>

@@ -28,7 +28,7 @@ function Login({ onNavigate, onLoginSuccess }) {
         if (response.ok) {
           // Trigger the state update in App component
           if (onLoginSuccess) {
-            onLoginSuccess(data.user);
+            onLoginSuccess(data.user, data.token);
           }
         } else {
           console.error("Backend Error:", data.error);

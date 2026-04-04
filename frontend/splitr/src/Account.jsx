@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Account.css';
 
-function Account({ user }) {
+function Account({ user, onLogout }) {
   const navigate = useNavigate();
 
   return (

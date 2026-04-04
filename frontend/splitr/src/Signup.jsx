@@ -38,15 +38,9 @@ function Signup({ onNavigate, onLoginSuccess }) {
           throw new Error(data.error || 'Signup failed');
         }
 
-        // Store token
-        localStorage.setItem("token", data.token);
-
-        //  store user for UI only
-        localStorage.setItem("user", JSON.stringify(data.user));
-
         // Callback
         if (onLoginSuccess) {
-          onLoginSuccess(data.user);
+          onLoginSuccess(data.user, data.token);
         }
 
       } catch (err) {

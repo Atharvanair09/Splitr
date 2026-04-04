@@ -53,9 +53,28 @@ function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  const handleLoginSuccess = (userData) => {
+  // Load user from localStorage on initial load
+  React.useEffect(() => {
+    const savedUser = localStorage.getItem('user');
+    if (savedUser) {
+      setUser(JSON.parse(savedUser));
+    }
+  }, []);
+
+  const handleLoginSuccess = (userData, token) => {
     setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+    if (token) {
+      localStorage.setItem('token', token);
+    }
     navigate('/dashboard');
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/login');
   };
 
   return (
@@ -78,10 +97,10 @@ function App() {
       <Route path="/dashboard" element={<Dashboard user={user} />} />
       <Route path="/dashboard/:id" element={<GroupDetail user={user} />} />
       <Route path="/group" element={<CreateGroup />} />
-      <Route path="/account" element={<Account user={user} />} />
-      <Route path="/settings" element={<Settings user={user} />} />
-      <Route path="/activity" element={<UnifiedAddExpense user={user} />} />
-      <Route path="/add-expense/:id" element={<UnifiedAddExpense user={user} />} />
+      <Route path="/account" element={<Account user={user} onLogout={handleLogout} />} />
+      <Route path="/settings" element={<Settings user={user} onLogout={handleLogout} />} />
+      <Route path="/activity" element={<UnifiedAddExpense user={user} onLogout={handleLogout} />} />
+      <Route path="/add-expense/:id" element={<UnifiedAddExpense user={user} onLogout={handleLogout} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

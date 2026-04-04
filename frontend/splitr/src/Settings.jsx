@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import './Settings.css';
 import Sidebar from './components/Sidebar';
 
-function Settings({ user }) {
+function Settings({ user, onLogout }) {
   const navigate = useNavigate();
 
   return (
@@ -11,7 +11,7 @@ function Settings({ user }) {
       {/* Sidebar Component */}
       <Sidebar activePage="settings">
         <button className="sidebar-btn-expense">GENERATE REPORT</button>
-        <button className="sidebar-btn-signout" onClick={() => navigate('/login')}>
+        <button className="sidebar-btn-signout" onClick={onLogout}>
           <span className="nav-icon" style={{marginRight: '5px'}}>▷</span> SIGN OUT
         </button>
       </Sidebar>
