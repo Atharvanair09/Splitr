@@ -121,38 +121,90 @@ function GroupDetail({ user }) {
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   // Handle settle
-  const handleSettle = async (from, to, amount) => {
-    const settleKey = `${from}-${to}`;
-    setSettling(settleKey);
+ const handleSettle = async (from, to, amount) => {
+  const settleKey = `${from}-${to}`;
+  setSettling(settleKey);
 
-    try {
-      // Create a settlement expense (from pays to)
-      const res = await fetch("http://localhost:5000/expense/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          groupId: id,
-          amount: amount,
-          paidBy: from,
-          splitBetween: [to],
-          notes: `Settlement: ${from} paid ${to}`,
-        }),
-      });
+  try {
+    // 1. Create order from backend
+    const orderRes = await fetch("http://localhost:5000/api/payment/create-order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ amount }),
+    });
 
-      if (!res.ok) throw new Error("Failed to settle");
+    const orderData = await orderRes.json();
 
-      // Refresh expenses
-      const expensesRes = await fetch(`http://localhost:5000/expense/group/${id}`);
-      const expensesData = await expensesRes.json();
-      setExpenses(expensesData);
+    // 2. Razorpay options
+    const options = {
+      key: "rzp_test_SZMjHxptIizsMu", 
+      amount: orderData.amount,
+      currency: "INR",
+      name: "Splitr",
+      description: `${from} pays ${to}`,
+      order_id: orderData.id,
 
-    } catch (err) {
-      console.error(err);
-      alert("Error settling up");
-    } finally {
-      setSettling(null);
-    }
-  };
+      handler: async function (response) {
+        // 3. Verify payment
+        const verifyRes = await fetch("http://localhost:5000/api/payment/verify", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(response),
+        });
+
+        const verifyData = await verifyRes.json();
+
+        if (verifyData.success) {
+          // 4. Mark settlement (same as your old logic)
+          await fetch("http://localhost:5000/expense/add", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              groupId: id,
+              amount: amount,
+              paidBy: from,
+              splitBetween: [to],
+              notes: `Settlement: ${from} paid ${to}`,
+            }),
+          });
+
+          // 5. Refresh expenses
+          const expensesRes = await fetch(
+            `http://localhost:5000/expense/group/${id}`
+          );
+          const expensesData = await expensesRes.json();
+          setExpenses(expensesData);
+        } else {
+          alert("Payment verification failed");
+        }
+      },
+
+      prefill: {
+        name: from,
+      },
+
+      theme: {
+        color: "#6366F1",
+      },
+    };
+
+    // 6. Open Razorpay popup
+    const rzp = new window.Razorpay(options);
+    rzp.open();
+
+  } catch (err) {
+    console.error(err);
+    alert("Payment failed");
+  } finally {
+    setSettling(null);
+  }
+};
 
   // Time ago helper
   const timeAgo = (dateStr) => {
