@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useNavigate, useParams, Link, useLocation } from "react-router-dom";
 import Sidebar from './components/Sidebar';
+import InsightsModal from "./components/InsightsModal";
 
 function Dashboard({ user }) {
   const navigate = useNavigate(); 
@@ -10,6 +11,8 @@ function Dashboard({ user }) {
   const [groups, setGroups] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showInsightsModal, setShowInsightsModal] = useState(false);
+  const [selectedInsightGroupId, setSelectedInsightGroupId] = useState(null);
 
   // Fetch groups and expenses on mount
   useEffect(() => {
@@ -54,10 +57,13 @@ function Dashboard({ user }) {
   // Group icons pool
   const groupIcons = ['🏖️', '✈️', '🍕', '🏠', '🎮', '🎉', '☂️', '🚗', '📚', '💼'];
 
+  const location = useLocation();
+  const isGroupsPage = location.pathname === '/groups';
+
   return (
     <div className="dashboard-container">
       {/* Sidebar Component */}
-      <Sidebar activePage="dashboard">
+      <Sidebar activePage={isGroupsPage ? "groups" : "dashboard"}>
         <button 
           className="sidebar-btn-expense"
           onClick={() => navigate(`/activity`)}
@@ -117,25 +123,39 @@ function Dashboard({ user }) {
             <div className="left-column">
               
               {/* Balance Card - real data */}
-              <div className="balance-card">
-                <div className="balance-label">Total Expenses</div>
-                <div className="balance-amount">₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
-                <div className="balance-details">
-                  <div>
-                    <div className="balance-label">Groups</div>
-                    <div className="detail-amount">{groups.length}</div>
-                  </div>
-                  <div>
-                    <div className="balance-label">Transactions</div>
-                    <div className="detail-amount">{expenses.length}</div>
+              {!isGroupsPage && (
+                <div className="balance-card">
+                  <div className="balance-label">Total Expenses</div>
+                  <div className="balance-amount">₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                  <div className="balance-details">
+                    <div>
+                      <div className="balance-label">Groups</div>
+                      <div className="detail-amount">{groups.length}</div>
+                    </div>
+                    <div>
+                      <div className="balance-label">Transactions</div>
+                      <div className="detail-amount">{expenses.length}</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Groups Section */}
               <div className="section-header">
                 <h3 className="section-title">Your Groups</h3>
-                <span className="view-all" onClick={() => navigate("/group")}>+ New Group</span>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <button 
+                    className="btn-insight-trigger" 
+                    onClick={() => {
+                      setSelectedInsightGroupId(groups.length > 0 ? groups[0]._id : null);
+                      setShowInsightsModal(true);
+                    }}
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" /><path d="M12 3v9h9" /></svg>
+                    Insights
+                  </button>
+                  <span className="view-all" onClick={() => navigate("/group")}>+ New Group</span>
+                </div>
               </div>
 
               <div className="groups-grid">
@@ -161,7 +181,9 @@ function Dashboard({ user }) {
                       >
                         <div className="group-header">
                           <div className="group-icon">{groupIcons[index % groupIcons.length]}</div>
-                          <span className="status-badge status-active">Active</span>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <span className="status-badge status-active">Active</span>
+                          </div>
                         </div>
                         <h4 className="group-name">{group.name}</h4>
                         <div className="group-meta">
@@ -256,6 +278,15 @@ function Dashboard({ user }) {
       <div className="fab" onClick={() => navigate(`/activity`)}>
         <span style={{ fontSize: '1.2rem' }}>+</span>
       </div>
+
+      <InsightsModal 
+        isOpen={showInsightsModal} 
+        onClose={() => setShowInsightsModal(false)}
+        groups={groups}
+        initialGroupId={selectedInsightGroupId}
+        expenses={expenses}
+        currentUser={user?.name || "Arjun Rao"} 
+      />
     </div>
   );
 }

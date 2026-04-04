@@ -580,3 +580,105 @@
     justify-content: center;
   }
 }
+
+/* ── Progress Member List ── */
+.members-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.insight-member-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.insight-member-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.member-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #E0E7FF;
+  color: #4F46E5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.member-name {
+  font-weight: 600;
+  color: #0F172A;
+  font-size: 0.95rem;
+  width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-you {
+  font-weight: 400;
+  color: #64748B;
+  font-size: 0.85rem;
+}
+
+.member-progress-container {
+  flex: 1;
+  height: 6px;
+  background-color: #F1F5F9;
+  border-radius: 3px;
+  margin: 0 1rem;
+  overflow: hidden;
+  display: flex;
+}
+
+.member-progress-bar {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.insight-member-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  min-width: 110px;
+}
+
+.member-amount {
+  font-weight: 700;
+  color: #0F172A;
+  font-size: 0.9rem;
+}
+
+.member-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  text-transform: uppercase;
+  width: 50px;
+  text-align: center;
+}
+
+.bg-green-light { background: #ECFDF5; }
+.text-green { color: #10B981; }
+
+.bg-orange-light { background: #FFF7ED; }
+.text-orange { color: #F59E0B; }
+
+.bg-red-light { background: #FEF2F2; }
+.text-red { color: #EF4444; }
