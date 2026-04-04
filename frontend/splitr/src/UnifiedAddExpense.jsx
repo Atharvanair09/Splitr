@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import './Activity.css';
@@ -78,6 +78,71 @@ function UnifiedAddExpense({ user, onLogout }) {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
+
+  // --- VOICE INPUT STATE ---
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  const startListening = useCallback(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in your browser. Please use Chrome or Edge.');
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'en-IN';
+    recognition.interimResults = true;
+    recognition.continuous = true;
+    recognition.maxAlternatives = 1;
+
+    let finalTranscript = inputValue;
+
+    recognition.onresult = (event) => {
+      let interimTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += (finalTranscript ? ' ' : '') + transcript;
+        } else {
+          interimTranscript += transcript;
+        }
+      }
+      setInputValue(finalTranscript + (interimTranscript ? ' ' + interimTranscript : ''));
+    };
+
+    recognition.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+      if (event.error !== 'aborted') {
+        setIsListening(false);
+      }
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+      recognitionRef.current = null;
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [inputValue]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsListening(false);
+  }, []);
+
+  const toggleVoiceInput = useCallback(() => {
+    if (isListening) {
+      stopListening();
+    } else {
+      startListening();
+    }
+  }, [isListening, startListening, stopListening]);
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -358,12 +423,14 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
 
               {/* Chat Input Field Bottom */}
               <div className="chat-input-bar" style={{borderBottomRightRadius: '16px', borderBottomLeftRadius: '16px', border: 'none', borderTop: '1px solid #e2e8f0', boxShadow: 'none', background: 'transparent', display: 'flex', alignItems: 'center'}}>
-                {/* <button 
-                  className="chat-voice-btn"
-                  title="Voice Input (Hackathon Mode)"
-                  onClick={() => alert("Simulating Voice Transcription... 'I paid 500 for drinks and split it with Rahul.'")}
-                  style={{background: 'none', border: 'none', color: '#4361EE', cursor: 'pointer', fontSize: '1.2rem', padding: '0 10px'}}
-                >🎤</button> */}
+                <button 
+                  className={`chat-voice-btn ${isListening ? 'listening' : ''}`}
+                  title={isListening ? "Stop Voice Input" : "Voice Input (Hackathon Mode)"}
+                  onClick={toggleVoiceInput}
+                  disabled={isChatLoading}
+                >
+                  {isListening ? '🔴' : '🎤'}
+                </button>
                 <input 
                   type="text" 
                   placeholder={id ? `Splitting in "${id}"...` : "Type your expense..."} 
