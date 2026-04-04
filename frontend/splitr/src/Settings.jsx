@@ -11,6 +11,7 @@ function Settings({ user, onLogout }) {
   const [incomingRequests, setIncomingRequests] = React.useState([]);
   const [searching, setSearching] = React.useState(false);
   const [error, setError] = React.useState(null);
+  const [totalSpent, setTotalSpent] = React.useState(0);
 
   // Fetch friends and requests on mount
   React.useEffect(() => {
@@ -26,8 +27,17 @@ function Settings({ user, onLogout }) {
         .then(res => res.json())
         .then(data => setIncomingRequests(data))
         .catch(err => console.error("Error fetching requests:", err));
+
+      // 3. Fetch total spent (for profile header)
+      fetch(`http://localhost:5000/expense/user/${user.name}`)
+        .then(res => res.json())
+        .then(data => {
+          const total = data.reduce((sum, e) => sum + (e.amount || 0), 0);
+          setTotalSpent(total);
+        })
+        .catch(err => console.error("Error fetching total spending:", err));
     }
-  }, [user?._id]);
+  }, [user?._id, user?.name]);
 
   // Search users whenever searchQuery changes
   React.useEffect(() => {
@@ -151,7 +161,7 @@ function Settings({ user, onLogout }) {
             <span className="header-icon">✂️</span>
             
             <div className="settings-user-profile" onClick={() => navigate('/account')}>
-              <span className="settings-user-name">{user?.name || "Alexander Vance"}</span>
+              <span className="settings-user-name">{user?.name || "User"}</span>
               <img 
                 src={user?.picture || "https://api.dicebear.com/7.x/avataaars/svg?seed=Alexander"} 
                 alt="Profile" 
@@ -175,14 +185,14 @@ function Settings({ user, onLogout }) {
                   <span className="shc-badge">ELITE MEMBER</span>
                 </div>
                 <div className="shc-user-info">
-                  <h2>{user?.name || "Alexander Vance"}</h2>
-                  <p>Head of Strategic Operations • Member since 2021</p>
+                  <h2>{user?.name || "Indigo User"}</h2>
+                  <p>Verified Indigo Member • Member since 2024</p>
                 </div>
               </div>
               <div className="shc-right">
                 <div className="shc-stat">
-                  <span className="stat-label">TOTAL MANAGED</span>
-                  <span className="stat-value">$128,490</span>
+                  <span className="stat-label">TOTAL SPENT</span>
+                  <span className="stat-value">₹{totalSpent.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</span>
                 </div>
                 <div className="shc-divider"></div>
                 <div className="shc-stat">
@@ -214,7 +224,7 @@ function Settings({ user, onLogout }) {
                   <div className="pi-card-icon">✉️</div>
                   <div className="pi-card-content">
                     <label>EMAIL ADDRESS</label>
-                    <p>{user?.email || "a.vance@ledgerpro.ai"}</p>
+                    <p>{user?.email || "Connect email in settings"}</p>
                   </div>
                   <div className="pi-card-edit">✎</div>
                 </div>
@@ -222,7 +232,7 @@ function Settings({ user, onLogout }) {
                   <div className="pi-card-icon">📞</div>
                   <div className="pi-card-content">
                     <label>PHONE NUMBER</label>
-                    <p>+1 (555) 012-8849</p>
+                    <p>+91 91234 56789</p>
                   </div>
                   <div className="pi-card-edit">✎</div>
                 </div>
