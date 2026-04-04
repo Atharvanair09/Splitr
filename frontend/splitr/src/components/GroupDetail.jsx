@@ -633,24 +633,20 @@ function GroupDetail({ user }) {
                           </div>
                         </div>
 
-                        <div className="gd-flow-actions">
-                          {bal.from.toLowerCase() === (currentUser || "").toLowerCase() && (
-                            <>
-                              <button
-                                className={`gd-btn-action-primary ${isSettling ? "settling" : ""}`}
-                                onClick={() => handleSettle(bal.from, bal.to, bal.amount)}
-                                disabled={isSettling}
-                              >
-                                {isSettling ? "..." : "Settle"}
-                              </button>
-                              <button
-                                className="gd-btn-action-upi"
-                                onClick={() => setUpiTarget({ from: bal.from, to: bal.to, amount: bal.amount })}
-                              >
-                                UPI ⚡
-                              </button>
-                            </>
-                          )}
+                        <div className="gd-flow-actions" style={{display: 'flex', gap: '8px'}}>
+                          <button
+                            className={`gd-btn-action-primary ${isSettling ? "settling" : ""}`}
+                            onClick={() => handleSettle(bal.from, bal.to, bal.amount)}
+                            disabled={isSettling}
+                          >
+                            {isSettling ? "..." : "Settle"}
+                          </button>
+                          <button
+                            className="gd-btn-action-upi"
+                            onClick={() => setUpiTarget({ from: bal.from, to: bal.to, amount: bal.amount })}
+                          >
+                            UPI ⚡
+                          </button>
                         </div>
                       </div>
                     );

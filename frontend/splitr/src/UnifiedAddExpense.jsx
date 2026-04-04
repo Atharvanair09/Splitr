@@ -74,10 +74,14 @@ function UnifiedAddExpense({ user, onLogout }) {
 
   // --- CHAT STATE ---
   const [messages, setMessages] = useState([
-    { role: 'bot', type: 'text', text: "Hey! Tell me about an expense to split — just type naturally. I'll auto-fill the form for you!" }
+    { role: 'bot', type: 'text', text: "Hey! Tell me about an expense to split or upload a receipt — just type naturally or click the attach button. I'll auto-fill the form for you!" }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
+
+  // --- FILE UPLOAD (OCR) STATE ---
+  const fileInputRef = useRef(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // --- VOICE INPUT STATE ---
   const [isListening, setIsListening] = useState(false);
@@ -144,17 +148,24 @@ function UnifiedAddExpense({ user, onLogout }) {
     }
   }, [isListening, startListening, stopListening]);
 
-  const handleSend = async () => {
-    if (!inputValue.trim()) return;
-    const userMsg = inputValue;
-    setMessages(prev => [...prev, { role: 'user', type: 'text', text: userMsg }]);
-    setInputValue('');
+  const performAICompletion = async (msgText, base64Image = null) => {
+    setMessages(prev => [...prev, { role: 'user', type: 'text', text: msgText }]);
     setIsChatLoading(true);
 
     try {
       const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY;
       if (!apiKey) {
         throw new Error("Missing OpenRouter API Key. Add VITE_OPENROUTER_API_KEY to your frontend .env file.");
+      }
+
+      let userContent;
+      if (base64Image) {
+        userContent = [
+          { type: "text", text: msgText },
+          { type: "image_url", image_url: { url: base64Image } }
+        ];
+      } else {
+        userContent = msgText;
       }
 
       const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -164,7 +175,7 @@ function UnifiedAddExpense({ user, onLogout }) {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          model: "openai/gpt-3.5-turbo",
+          model: "openai/gpt-4o-mini",
           messages: [{
             role: "system",
             content: `You are an AI expense parser for the app "Splitr".
@@ -199,7 +210,7 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
 }`
           }, {
             role: "user",
-            content: userMsg
+            content: userContent
           }]
         })
       });
@@ -228,6 +239,52 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
        setMessages(prev => [...prev, { role: 'bot', type: 'error', text: error.message || "Failed to process expense." }]);
     } finally {
        setIsChatLoading(false);
+    }
+  };
+
+  const handleSend = () => {
+    if (!inputValue.trim()) return;
+    performAICompletion(inputValue);
+    setInputValue('');
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setMessages(prev => [...prev, { role: 'bot', type: 'text', text: "Analyzing receipt visually using AI... 📄" }]);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64Image = reader.result;
+          const userMsg = `I have uploaded a receipt image. Please act as an expert receipt parser. Parse the exact expense details from this image, including the total amount, category, and what the expense was for. Reconstruct the prices accurately. If any names are visible for who paid, include them.`;
+          
+          await performAICompletion(userMsg, base64Image);
+        } catch (error) {
+           console.error("OpenRouter Vision Error:", error);
+           setMessages(prev => [...prev, { role: 'bot', type: 'error', text: "Failed to process the receipt image. Please try again or type manually." }]);
+        } finally {
+           setIsUploading(false);
+           if (fileInputRef.current) fileInputRef.current.value = null;
+        }
+      };
+      
+      reader.onerror = (error) => {
+        console.error("File Read Error:", error);
+        setMessages(prev => [...prev, { role: 'bot', type: 'error', text: "Failed to read the file. Please try again." }]);
+        setIsUploading(false);
+        if (fileInputRef.current) fileInputRef.current.value = null;
+      };
+      
+      reader.readAsDataURL(file);
+    } catch (error) {
+       console.error("Upload Error:", error);
+       setMessages(prev => [...prev, { role: 'bot', type: 'error', text: "Failed to upload the receipt image. Please try again or type manually." }]);
+       setIsUploading(false);
+       if (fileInputRef.current) fileInputRef.current.value = null;
     }
   };
 
@@ -423,11 +480,40 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
 
               {/* Chat Input Field Bottom */}
               <div className="chat-input-bar" style={{borderBottomRightRadius: '16px', borderBottomLeftRadius: '16px', border: 'none', borderTop: '1px solid #e2e8f0', boxShadow: 'none', background: 'transparent', display: 'flex', alignItems: 'center'}}>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  style={{ display: 'none' }} 
+                  ref={fileInputRef} 
+                  onChange={handleFileUpload} 
+                />
+                <button 
+                  className="upload-receipt-btn"
+                  title="Upload Receipt"
+                  onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                  disabled={isUploading || isChatLoading}
+                  style={{ 
+                    marginRight: '8px', 
+                    padding: '8px 12px', 
+                    background: '#e0e7ff', 
+                    color: '#4338ca', 
+                    border: 'none', 
+                    borderRadius: '8px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {isUploading ? '⌛ Uploading...' : '📎 Upload Receipt'}
+                </button>
                 <button 
                   className={`chat-voice-btn ${isListening ? 'listening' : ''}`}
                   title={isListening ? "Stop Voice Input" : "Voice Input (Hackathon Mode)"}
                   onClick={toggleVoiceInput}
-                  disabled={isChatLoading}
+                  disabled={isChatLoading || isUploading}
                 >
                   {isListening ? '🔴' : '🎤'}
                 </button>
@@ -437,10 +523,10 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  disabled={isChatLoading}
+                  disabled={isChatLoading || isUploading}
                   style={{paddingLeft: '10px'}}
                 />
-                <button className="chat-send-btn" onClick={handleSend} disabled={isChatLoading}>→</button>
+                <button className="chat-send-btn" onClick={handleSend} disabled={isChatLoading || isUploading}>→</button>
               </div>
 
             </div>
