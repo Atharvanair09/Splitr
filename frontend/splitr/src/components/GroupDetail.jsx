@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import UpiPaymentModal from "./UpiPaymentModal";
 import "./GroupDetail.css";
 
 function GroupDetail({ user }) {
@@ -10,6 +11,7 @@ function GroupDetail({ user }) {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [settling, setSettling] = useState(null); // track which pair is settling
+  const [upiTarget, setUpiTarget] = useState(null); // {from, to, amount} for UPI modal
 
   useEffect(() => {
     const fetchData = async () => {
@@ -394,25 +396,34 @@ function GroupDetail({ user }) {
                         </div>
                       </div>
 
-                      <button
-                        className={`gd-btn-settle ${isSettling ? "settling" : ""}`}
-                        onClick={() => handleSettle(bal.from, bal.to, bal.amount)}
-                        disabled={isSettling}
-                      >
-                        {isSettling ? (
-                          <>
-                            <span className="gd-btn-spinner"></span>
-                            Settling...
-                          </>
-                        ) : (
-                          <>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                            Settle
-                          </>
-                        )}
-                      </button>
+                      <div className="gd-settle-actions">
+                        <button
+                          className={`gd-btn-settle ${isSettling ? "settling" : ""}`}
+                          onClick={() => handleSettle(bal.from, bal.to, bal.amount)}
+                          disabled={isSettling}
+                        >
+                          {isSettling ? (
+                            <>
+                              <span className="gd-btn-spinner"></span>
+                              Settling...
+                            </>
+                          ) : (
+                            <>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="20 6 9 17 4 12" />
+                              </svg>
+                              Settle
+                            </>
+                          )}
+                        </button>
+                        <button
+                          className="gd-btn-upi"
+                          onClick={() => setUpiTarget({ from: bal.from, to: bal.to, amount: bal.amount })}
+                          disabled={isSettling}
+                        >
+                          ⚡ Pay via UPI
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -478,6 +489,24 @@ function GroupDetail({ user }) {
           </div>
         </div>
       </div>
+
+      {/* UPI Payment Modal */}
+      {upiTarget && (
+        <UpiPaymentModal
+          from={upiTarget.from}
+          to={upiTarget.to}
+          amount={upiTarget.amount}
+          groupId={id}
+          onClose={() => setUpiTarget(null)}
+          onSettled={async () => {
+            setUpiTarget(null);
+            // Refresh expenses
+            const expensesRes = await fetch(`http://localhost:5000/expense/group/${id}`);
+            const expensesData = await expensesRes.json();
+            setExpenses(expensesData);
+          }}
+        />
+      )}
     </div>
   );
 }

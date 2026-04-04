@@ -393,6 +393,45 @@
   animation: gdSpin 0.6s linear infinite;
 }
 
+/* ── Settle Actions Container ── */
+.gd-settle-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* ── UPI Button ── */
+.gd-btn-upi {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, #4361EE, #6C48F5);
+  color: white;
+  border: none;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(67, 97, 238, 0.3);
+  white-space: nowrap;
+}
+
+.gd-btn-upi:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3651DE, #5C38E5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.4);
+}
+
+.gd-btn-upi:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 /* ── Empty State ── */
 .gd-empty {
   display: flex;
@@ -527,6 +566,16 @@
   }
 
   .gd-btn-settle {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .gd-settle-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .gd-btn-upi {
     width: 100%;
     justify-content: center;
   }
