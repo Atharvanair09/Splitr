@@ -12,6 +12,7 @@ function UnifiedAddExpense({ user, onLogout }) {
   const [amount, setAmount] = useState("");
   const [paidBy, setPaidBy] = useState("");
   const [splitBetween, setSplitBetween] = useState("");
+  const [splitDetails, setSplitDetails] = useState([]);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -54,17 +55,24 @@ function UnifiedAddExpense({ user, onLogout }) {
           model: "openai/gpt-3.5-turbo",
           messages: [{
             role: "system",
-            content: `You are an AI expense parser. Extract the following from natural language expense inputs and return ONLY valid JSON:
+            content: `You are an AI expense parser with critical thinking for fair splitting. 
+Extract expense details from natural language. 
+IMPORTANT: If the user describes an uneven split (e.g. "I paid 1000 but I ate for 200, Rahul for 400, and Amit for 400"), you MUST calculate individual amounts.
+If they say "split equally" or do not mention at all, divide the total.
+Return ONLY valid JSON:
 {
   "category": "e.g. FOOD & DRINK",
-  "amount": "numbers only",
-  "currency": "symbol like ₹ or $",
+  "amount": number,
+  "currency": "₹",
   "title": "short relevant title",
   "confidence": number 0-100,
   "paidBy": "person who paid",
-  "splitType": "e.g. Split equally",
-  "between": ["person1", "person2", "person3"],
-  "eachPays": number for each person
+  "splitType": "Uneven" or "Equal",
+  "between": ["person1", "person2"],
+  "splitDetails": [
+    {"name": "person1", "amount": 200},
+    {"name": "person2", "amount": 800}
+  ]
 }`
           }, {
             role: "user",
@@ -89,6 +97,7 @@ function UnifiedAddExpense({ user, onLogout }) {
       if(parsed.amount) setAmount(parsed.amount.toString());
       if(parsed.paidBy) setPaidBy(parsed.paidBy);
       if(parsed.between && Array.isArray(parsed.between)) setSplitBetween(parsed.between.join(", "));
+      if(parsed.splitDetails && Array.isArray(parsed.splitDetails)) setSplitDetails(parsed.splitDetails);
       if(parsed.title) setNotes(parsed.title);
 
     } catch (error) {
@@ -126,6 +135,7 @@ function UnifiedAddExpense({ user, onLogout }) {
           amount: parseFloat(amount),
           paidBy,
           splitBetween: memberList,
+          splitDetails: splitDetails.length > 0 ? splitDetails : memberList.map(name => ({ name, amount: parseFloat(perPerson) })),
           notes,
         }),
       });
@@ -259,8 +269,15 @@ function UnifiedAddExpense({ user, onLogout }) {
                             </div>
                             
                             <div className="epc-row">
-                              <label>Each pays</label>
-                              <div className="epc-value epc-pay-amt">{d.currency || "$"}{Number(d.eachPays).toLocaleString()}</div>
+                              <label>Breakdown</label>
+                              <div className="epc-value">
+                                {d.splitDetails?.map((item, idx) => (
+                                  <div key={idx} style={{fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+                                    <span>{item.name}:</span>
+                                    <span style={{fontWeight: '700'}}>{d.currency || "₹"}{item.amount}</span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           </div>
                           
@@ -364,12 +381,22 @@ function UnifiedAddExpense({ user, onLogout }) {
                     )}
                   </div>
                   <div className="split-chips">
-                    {memberList.map((name, i) => (
-                      <div key={i} className="split-chip">
-                        <span className="split-chip-avatar">{name.charAt(0).toUpperCase()}</span>
-                        <span className="split-chip-name">{name}</span>
-                      </div>
-                    ))}
+                    {memberList.map((name, i) => {
+                      const individualDetail = splitDetails.find(d => d.name.toLowerCase() === name.toLowerCase());
+                      return (
+                        <div key={i} className="split-chip" style={{flexDirection: 'column', height: 'auto', padding: '10px'}}>
+                          <div style={{display: 'flex', alignItems: 'center', gap: '8px', width: '100%'}}>
+                            <span className="split-chip-avatar">{name.charAt(0).toUpperCase()}</span>
+                            <span className="split-chip-name">{name}</span>
+                          </div>
+                          {individualDetail && (
+                            <div style={{fontSize: '0.7rem', fontWeight: '800', color: '#4361EE', marginTop: '5px'}}>
+                              OWES: ₹{individualDetail.amount}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

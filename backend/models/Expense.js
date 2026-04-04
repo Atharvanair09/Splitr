@@ -19,6 +19,12 @@ const expenseSchema = new mongoose.Schema({
       type: String,
     },
   ],
+  splitDetails: [
+    {
+      name: { type: String },
+      amount: { type: Number }
+    }
+  ],
   notes: {
     type: String,
   },

@@ -128,40 +128,81 @@ app.get("/api/users/search", async (req, res) => {
   }
 });
 
-// 2. Follow/Add Friend
+// 2. Request to Follow (Send Request)
 app.post("/api/users/follow", async (req, res) => {
   try {
     const { userId, targetId } = req.body;
-    
     if (userId === targetId) return res.status(400).json({ error: "Cannot follow yourself" });
 
-    // Add targetId to userId's friends
+    // Add targetId to userId's outgoing
+    await User.findByIdAndUpdate(userId, { $addToSet: { outgoingRequests: targetId } });
+    // Add userId to targetId's incoming
+    await User.findByIdAndUpdate(targetId, { $addToSet: { incomingRequests: userId } });
+
+    res.json({ success: true, message: "Follow request sent" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Accept Follow Request
+app.post("/api/users/accept-request", async (req, res) => {
+  try {
+    const { userId, targetId } = req.body; // userId is ME, targetId is HIM (requester)
+
+    // Move him from my incomingRequests to friends
     await User.findByIdAndUpdate(userId, {
+      $pull: { incomingRequests: targetId },
       $addToSet: { friends: targetId }
     });
 
+    // Move me from his outgoingRequests to friends
+    await User.findByIdAndUpdate(targetId, {
+      $pull: { outgoingRequests: userId },
+      $addToSet: { friends: userId }
+    });
+
+    res.json({ success: true, message: "Request accepted" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Decline/Cancel Request
+app.post("/api/users/decline-request", async (req, res) => {
+  try {
+    const { userId, targetId } = req.body;
+    await User.findByIdAndUpdate(userId, { $pull: { incomingRequests: targetId } });
+    await User.findByIdAndUpdate(targetId, { $pull: { outgoingRequests: userId } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// 3. Unfollow/Remove Friend
+// 5. Get My Pending Incoming Requests
+app.get("/api/users/requests/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).populate("incomingRequests", "name email picture");
+    res.json(user.incomingRequests || []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 6. Unfollow/Remove Friend
 app.post("/api/users/unfollow", async (req, res) => {
   try {
     const { userId, targetId } = req.body;
-
-    await User.findByIdAndUpdate(userId, {
-      $pull: { friends: targetId }
-    });
-
+    await User.findByIdAndUpdate(userId, { $pull: { friends: targetId } });
+    await User.findByIdAndUpdate(targetId, { $pull: { friends: userId } });
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
 
-// 4. Get Friends List
+// 7. Get Friends List (Only accepted)
 app.get("/api/users/friends/:userId", async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).populate("friends", "name email picture");

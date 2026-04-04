@@ -89,22 +89,36 @@ function GroupDetail({ user }) {
 
     // Process each expense
     expenses.forEach((expense) => {
-      const { paidBy, splitBetween, amount } = expense;
+      const { paidBy, splitBetween, amount, splitDetails } = expense;
       if (!splitBetween || splitBetween.length === 0) return;
 
-      const share = amount / splitBetween.length;
-
-      splitBetween.forEach((person) => {
-        if (person !== paidBy) {
-          // person owes paidBy
-          if (balances[person] && balances[person][paidBy] !== undefined) {
-            balances[person][paidBy] += share;
+      // Use splitDetails if available (for uneven splits), otherwise fallback to equal split
+      if (splitDetails && splitDetails.length > 0) {
+        splitDetails.forEach((detail) => {
+          if (detail.name !== paidBy) {
+            const share = detail.amount;
+            if (balances[detail.name] && balances[detail.name][paidBy] !== undefined) {
+              balances[detail.name][paidBy] += share;
+            }
+            if (balances[paidBy] && balances[paidBy][detail.name] !== undefined) {
+              balances[paidBy][detail.name] -= share;
+            }
           }
-          if (balances[paidBy] && balances[paidBy][person] !== undefined) {
-            balances[paidBy][person] -= share;
+        });
+      } else {
+        // Fallback to equal split
+        const share = amount / splitBetween.length;
+        splitBetween.forEach((person) => {
+          if (person !== paidBy) {
+            if (balances[person] && balances[person][paidBy] !== undefined) {
+              balances[person][paidBy] += share;
+            }
+            if (balances[paidBy] && balances[paidBy][person] !== undefined) {
+              balances[paidBy][person] -= share;
+            }
           }
-        }
-      });
+        });
+      }
     });
 
     // Simplify: net balances between each pair
@@ -692,12 +706,25 @@ function GroupDetail({ user }) {
                     {expense.notes && (
                       <div className="gd-expense-notes">"{expense.notes}"</div>
                     )}
-                    <div className="gd-expense-split">
-                      Split between: {expense.splitBetween.join(", ")}
-                      <span className="gd-expense-per-person">
-                        (₹{(expense.amount / expense.splitBetween.length).toFixed(2)} each)
-                      </span>
-                    </div>
+                    {expense.splitDetails && expense.splitDetails.length > 0 ? (
+                      <div className="gd-expense-split" style={{flexDirection: 'column', alignItems: 'flex-start'}}>
+                        <span style={{marginBottom: '4px'}}>Individual Breakdown:</span>
+                        <div style={{display: 'flex', flexWrap: 'wrap', gap: '8px'}}>
+                          {expense.splitDetails.map((d, i) => (
+                             <span key={i} style={{fontSize: '0.75rem', background: '#f1f5f9', padding: '2px 8px', borderRadius: '4px'}}>
+                               {d.name}: ₹{d.amount}
+                             </span>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="gd-expense-split">
+                        Split between: {expense.splitBetween.join(", ")}
+                        <span className="gd-expense-per-person">
+                          (₹{(expense.amount / expense.splitBetween.length).toFixed(2)} each)
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -8,16 +8,24 @@ function Settings({ user, onLogout }) {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [searchResults, setSearchResults] = React.useState([]);
   const [friends, setFriends] = React.useState([]);
+  const [incomingRequests, setIncomingRequests] = React.useState([]);
   const [searching, setSearching] = React.useState(false);
   const [error, setError] = React.useState(null);
 
-  // Fetch friends on mount
+  // Fetch friends and requests on mount
   React.useEffect(() => {
     if (user?._id) {
+      // 1. Fetch friends
       fetch(`http://localhost:5000/api/users/friends/${user._id}`)
         .then(res => res.json())
         .then(data => setFriends(data))
         .catch(err => console.error("Error fetching friends:", err));
+
+      // 2. Fetch incoming requests
+      fetch(`http://localhost:5000/api/users/requests/${user._id}`)
+        .then(res => res.json())
+        .then(data => setIncomingRequests(data))
+        .catch(err => console.error("Error fetching requests:", err));
     }
   }, [user?._id]);
 
@@ -60,14 +68,48 @@ function Settings({ user, onLogout }) {
         body: JSON.stringify({ userId: user._id, targetId })
       });
       if (res.ok) {
-        // Refresh friends list
-        const friendsRes = await fetch(`http://localhost:5000/api/users/friends/${user._id}`);
-        const friendsData = await friendsRes.json();
-        setFriends(friendsData);
-        setSearchQuery(""); // Clear search after follow
+        // Just clear search, we don't add to friends yet!
+        setSearchQuery("");
+        alert("Follow request sent!");
       }
     } catch (err) {
       console.error("Follow error:", err);
+    }
+  };
+
+  const handleAccept = async (targetId) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/users/accept-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id, targetId })
+      });
+      if (res.ok) {
+        // Refresh everything
+        const [fRes, rRes] = await Promise.all([
+          fetch(`http://localhost:5000/api/users/friends/${user._id}`),
+          fetch(`http://localhost:5000/api/users/requests/${user._id}`)
+        ]);
+        setFriends(await fRes.json());
+        setIncomingRequests(await rRes.json());
+      }
+    } catch (err) {
+      console.error("Accept error:", err);
+    }
+  };
+
+  const handleDecline = async (targetId) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/users/decline-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id, targetId })
+      });
+      if (res.ok) {
+        setIncomingRequests(incomingRequests.filter(r => r._id !== targetId));
+      }
+    } catch (err) {
+      console.error("Decline error:", err);
     }
   };
 
@@ -227,13 +269,40 @@ function Settings({ user, onLogout }) {
                             </div>
                           </div>
                           {!isFriend ? (
-                            <button className="btn-follow" onClick={() => handleFollow(resUser._id)}>Follow</button>
+                            <button className="btn-follow" onClick={() => handleFollow(resUser._id)}>Follow Request</button>
                           ) : (
-                            <button className="btn-unfollow" onClick={() => handleUnfollow(resUser._id)}>Following</button>
+                            <button className="btn-unfollow" disabled>Friend</button>
                           )}
                         </div>
                       );
                     })}
+                  </div>
+                )}
+
+                {/* Incoming Follow Requests */}
+                {incomingRequests.length > 0 && (
+                  <div className="requests-section" style={{marginTop: '20px', padding: '15px', background: '#f8fafc', borderRadius: '12px', border: '1px solid #e2e8f0'}}>
+                    <h4 style={{fontSize: '0.85rem', marginBottom: '15px', color: '#1e293b', fontWeight: '800'}}>Incoming Requests</h4>
+                    <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
+                      {incomingRequests.map(req => (
+                        <div key={req._id} style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+                          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                            <img src={req.picture} alt={req.name} style={{width: '30px', height: '30px', borderRadius: '50%'}} />
+                            <span style={{fontSize: '0.85rem', fontWeight: '600'}}>{req.name}</span>
+                          </div>
+                          <div style={{display: 'flex', gap: '8px'}}>
+                            <button 
+                              onClick={() => handleAccept(req._id)}
+                              style={{padding: '5px 12px', borderRadius: '6px', background: '#10b981', color: '#fff', border: 'none', fontSize: '0.75rem', cursor: 'pointer'}}
+                            >Accept</button>
+                            <button 
+                              onClick={() => handleDecline(req._id)}
+                              style={{padding: '5px 12px', borderRadius: '6px', background: '#ef4444', color: '#fff', border: 'none', fontSize: '0.75rem', cursor: 'pointer'}}
+                            >Ignore</button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
                 
