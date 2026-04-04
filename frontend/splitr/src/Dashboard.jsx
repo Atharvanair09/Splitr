@@ -13,6 +13,29 @@ function Dashboard({ user }) {
   const [loading, setLoading] = useState(true);
   const [showInsightsModal, setShowInsightsModal] = useState(false);
   const [selectedInsightGroupId, setSelectedInsightGroupId] = useState(null);
+  const [deleting, setDeleting] = useState(null);
+
+  // Delete group handler
+  const handleDeleteGroup = async (e, groupId, groupName) => {
+    e.stopPropagation(); // prevent navigating into the group
+    if (!window.confirm(`Delete "${groupName}"? This will also remove all its expenses.`)) return;
+
+    setDeleting(groupId);
+    try {
+      const res = await fetch(`http://localhost:5000/group/delete/${groupId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setGroups(prev => prev.filter(g => g._id !== groupId));
+        setExpenses(prev => prev.filter(e => e.groupId !== groupId && e.groupId?._id !== groupId));
+      } else {
+        alert('Failed to delete group');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to delete group');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   // Fetch groups and expenses on mount
   useEffect(() => {
@@ -183,6 +206,21 @@ function Dashboard({ user }) {
                           <div className="group-icon">{groupIcons[index % groupIcons.length]}</div>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <span className="status-badge status-active">Active</span>
+                            <button
+                              className="btn-delete-group"
+                              title="Delete group"
+                              disabled={deleting === group._id}
+                              onClick={(e) => handleDeleteGroup(e, group._id, group.name)}
+                            >
+                              {deleting === group._id ? (
+                                <span className="delete-spinner"></span>
+                              ) : (
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="3 6 5 6 21 6" />
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                </svg>
+                              )}
+                            </button>
                           </div>
                         </div>
                         <h4 className="group-name">{group.name}</h4>

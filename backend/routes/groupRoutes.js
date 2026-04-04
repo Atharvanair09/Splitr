@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Group = require("../models/Group");
+const Expense = require("../models/Expense");
 
 router.post("/create", async (req, res) => {
   try {
@@ -60,6 +61,27 @@ router.get("/user/:userName", async (req, res) => {
     }).sort({ createdAt: -1 });
 
     res.json(groups);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete a group and its expenses
+router.delete("/delete/:id", async (req, res) => {
+  try {
+    const group = await Group.findById(req.params.id);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Delete all expenses for this group
+    await Expense.deleteMany({ groupId: req.params.id });
+
+    // Delete the group
+    await Group.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Group deleted successfully" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
