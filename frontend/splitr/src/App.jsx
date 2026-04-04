@@ -9,6 +9,7 @@ import GroupDetail from './components/GroupDetail';
 import Account from './Account';
 import Settings from './Settings';
 import UnifiedAddExpense from './UnifiedAddExpense';
+import Inbox from './Inbox';
 
 function AuthLayout({ children }) {
   return (
@@ -102,6 +103,7 @@ function App() {
       <Route path="/settings" element={<Settings user={user} onLogout={handleLogout} />} />
       <Route path="/activity" element={<UnifiedAddExpense user={user} onLogout={handleLogout} />} />
       <Route path="/add-expense/:id" element={<UnifiedAddExpense user={user} onLogout={handleLogout} />} />
+      <Route path="/inbox" element={<Inbox user={user} />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

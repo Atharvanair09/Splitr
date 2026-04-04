@@ -7,6 +7,8 @@ const User = require("./models/User");
 const groupRoutes = require("./routes/groupRoutes");
 const expenseRoutes = require("./routes/expense");
 const paymentRoutes = require("./routes/payment");
+const { router: authRouter } = require("./routes/auth");
+const { fetchTransactionEmails } = require("./services/gmailService");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -95,6 +97,19 @@ app.use("/expense", expenseRoutes);
 
 //payment routes
 app.use("/api/payment", paymentRoutes);
+
+// Gmail routes
+app.use("/api/auth/gmail", authRouter);
+
+app.get("/api/transactions", async (req, res) => {
+  try {
+    const transactions = await fetchTransactionEmails();
+    res.json(transactions);
+  } catch (err) {
+    console.error("Fetch transactions error:", err);
+    res.status(500).json({ error: "Failed to fetch transactions from Gmail" });
+  }
+});
 
 // --- USER SEARCH & FRIENDS SYSTEM ---
 

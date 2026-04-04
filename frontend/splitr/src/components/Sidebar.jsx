@@ -26,6 +26,11 @@ function Sidebar({ activePage, children }) {
           Activity
         </Link>
 
+        <Link to="/inbox" className={`sidebar-nav-item ${activePage === 'inbox' ? 'active' : ''}`}>
+          <span className="sidebar-nav-icon">📥</span>
+          Inbox
+        </Link>
+
         <Link to="/settings" className={`sidebar-nav-item ${activePage === 'settings' ? 'active' : ''}`}>
           <span className="sidebar-nav-icon">⚙️</span>
           Settings

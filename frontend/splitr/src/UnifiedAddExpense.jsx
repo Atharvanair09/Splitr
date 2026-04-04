@@ -510,7 +510,7 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
                 onClick={handleSubmit}
                 disabled={loading || !amount || !paidBy || !splitBetween}
               >
-                {loading ? "Saving..." : "Save Expense to Ledger"}
+                {loading ? "Saving..." : "Save Expense"}
               </button>
             </div>
 

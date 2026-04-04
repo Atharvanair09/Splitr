@@ -171,12 +171,12 @@ function Dashboard({ user }) {
               </button>
             )}
 
-            <button 
+            {/* <button 
               className="btn-new-group"
               onClick={() => navigate("/group")}
             >
               New Group
-            </button>
+            </button> */}
 
             {/* <span style={{ fontSize: '1.2rem', color: '#64748B' }}>🔔</span> */}
 
