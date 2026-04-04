@@ -54,31 +54,47 @@ const InsightsModal = ({ isOpen, onClose, groups, initialGroupId, expenses, curr
     
     const mData = {};
     activeGroup.members.forEach(m => {
-      mData[m] = { name: m, paid: 0, share: 0 };
+      mData[m.toLowerCase()] = { name: m, paid: 0, share: 0 };
     });
+
+    const currentUserNameLower = currentUser.toLowerCase();
 
     expenses.forEach(exp => {
       const expGroupId = exp.groupId?._id || exp.groupId;
       if (expGroupId === activeGroup._id) {
         const amount = exp.amount || 0;
-        const splitLen = exp.splitBetween?.length || 1;
-        const splitAmount = amount / splitLen;
         
-        if (exp.paidBy && mData[exp.paidBy]) {
-          mData[exp.paidBy].paid += amount;
+        // 1. Calculate how much this user paid in this expense
+        if (exp.paidBy && exp.paidBy.toLowerCase() === currentUserNameLower) {
+          tPaid += amount;
         }
 
-        if (exp.splitBetween) {
-          exp.splitBetween.forEach(m => {
-            if (mData[m]) mData[m].share += splitAmount;
-          });
-          if (exp.splitBetween.includes(currentUser)) {
-            tShare += splitAmount;
-          }
+        // 2. Calculate this user's share in this expense
+        let userShare = 0;
+        if (exp.splitDetails && exp.splitDetails.length > 0) {
+           const mySplit = exp.splitDetails.find(d => d.name.toLowerCase() === currentUserNameLower);
+           if (mySplit) userShare = mySplit.amount;
+        } else if (exp.splitBetween && exp.splitBetween.some(m => m.toLowerCase() === currentUserNameLower)) {
+           userShare = amount / exp.splitBetween.length;
         }
-        
-        if (exp.paidBy === currentUser) {
-          tPaid += amount;
+        tShare += userShare;
+
+        // 3. Track per-member data for the list below
+        const paidByLower = exp.paidBy?.toLowerCase();
+        if (paidByLower && mData[paidByLower]) {
+          mData[paidByLower].paid += amount;
+        }
+
+        if (exp.splitDetails && exp.splitDetails.length > 0) {
+          exp.splitDetails.forEach(sd => {
+            const nameLower = sd.name.toLowerCase();
+            if (mData[nameLower]) mData[nameLower].share += sd.amount;
+          });
+        } else if (exp.splitBetween) {
+          const splitAmt = amount / exp.splitBetween.length;
+          exp.splitBetween.forEach(m => {
+            if (mData[m.toLowerCase()]) mData[m.toLowerCase()].share += splitAmt;
+          });
         }
       }
     });
