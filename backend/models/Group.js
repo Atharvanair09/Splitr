@@ -12,7 +12,19 @@ const groupSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  joinCode: {
+    type: String,
+    unique: true
   }
+});
+
+// Pre-save hook to generate 6-digit code
+groupSchema.pre('save', function(next) {
+  if (!this.joinCode) {
+    this.joinCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+  }
+  next();
 });
 
 module.exports = mongoose.model("Group", groupSchema);

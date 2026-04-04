@@ -50,4 +50,32 @@ router.get("/all", async (req, res) => {
   }
 });
 
+// Get all expenses for a user (across all their groups)
+router.get("/user/:userName", async (req, res) => {
+  try {
+    const userName = req.params.userName;
+    const Group = require("../models/Group");
+    
+    // 1. Find groups where user is a member
+    const userGroups = await Group.find({
+      members: { $regex: new RegExp(userName, "i") }
+    }).select("_id");
+    
+    const groupIds = userGroups.map(g => g._id);
+
+    // 2. Find expenses in those groups
+    const expenses = await Expense.find({
+      groupId: { $in: groupIds }
+    })
+      .populate("groupId", "name")
+      .sort({ createdAt: -1 })
+      .limit(20);
+
+    res.json(expenses);
+  } catch (err) {
+    console.error("User expenses error:", err);
+    res.status(500).json({ error: "Failed to fetch user expenses" });
+  }
+});
+
 module.exports = router;
