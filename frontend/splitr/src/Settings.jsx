@@ -4,7 +4,77 @@ import './Settings.css';
 import Sidebar from './components/Sidebar';
 
 function Settings({ user, onLogout }) {
-  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [searchResults, setSearchResults] = React.useState([]);
+  const [friends, setFriends] = React.useState([]);
+  const [searching, setSearching] = React.useState(false);
+
+  // Fetch friends on mount
+  React.useEffect(() => {
+    if (user?._id) {
+      fetch(`http://localhost:5000/api/users/friends/${user._id}`)
+        .then(res => res.json())
+        .then(data => setFriends(data))
+        .catch(err => console.error("Error fetching friends:", err));
+    }
+  }, [user?._id]);
+
+  // Search users whenever searchQuery changes
+  React.useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchQuery.length > 1) {
+        setSearching(true);
+        fetch(`http://localhost:5000/api/users/search?query=${searchQuery}&currentUserId=${user?._id}`)
+          .then(res => res.json())
+          .then(data => {
+            setSearchResults(data);
+            setSearching(false);
+          })
+          .catch(err => {
+            console.error("Search error:", err);
+            setSearching(false);
+          });
+      } else {
+        setSearchResults([]);
+      }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery, user?._id]);
+
+  const handleFollow = async (targetId) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/users/follow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id, targetId })
+      });
+      if (res.ok) {
+        // Refresh friends list
+        const friendsRes = await fetch(`http://localhost:5000/api/users/friends/${user._id}`);
+        const friendsData = await friendsRes.json();
+        setFriends(friendsData);
+        setSearchQuery(""); // Clear search after follow
+      }
+    } catch (err) {
+      console.error("Follow error:", err);
+    }
+  };
+
+  const handleUnfollow = async (targetId) => {
+    try {
+      const res = await fetch("http://localhost:5000/api/users/unfollow", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id, targetId })
+      });
+      if (res.ok) {
+        setFriends(friends.filter(f => f._id !== targetId));
+      }
+    } catch (err) {
+      console.error("Unfollow error:", err);
+    }
+  };
 
   return (
     <div className="settings-dashboard-container">
@@ -107,41 +177,75 @@ function Settings({ user, onLogout }) {
               </div>
             </div>
 
-            {/* Security & Privacy */}
+            {/* Find Friends & Connections */}
             <div className="settings-section">
               <div className="section-header">
                 <div>
-                  <h3>Security & Privacy</h3>
-                  <p>Enhanced protection for your financial data.</p>
+                  <h3>Community & Connections</h3>
+                  <p>Search for other Ledger Pro users to build your network.</p>
                 </div>
               </div>
-              <div className="sp-list">
-                <div className="sp-list-item">
-                  <div className="sp-icon-wrapper">
-                    <span className="sp-icon">🔒</span>
-                  </div>
-                  <div className="sp-item-info">
-                    <h4>Security Cipher</h4>
-                    <p>Military-grade end-to-end encryption</p>
-                  </div>
-                  <div className="sp-item-action">
-                    <span className="status-badge encrypted">● ENCRYPTED</span>
-                  </div>
+              
+              <div className="user-search-container">
+                {/* Search Bar */}
+                <div className="search-input-wrapper">
+                  <span className="search-icon-inside">🔍</span>
+                  <input 
+                    type="text" 
+                    placeholder="Search by name or email (e.g. Atharva)..." 
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                 </div>
-                <div className="sp-list-item">
-                  <div className="sp-icon-wrapper">
-                    <span className="sp-icon">🛡️</span>
+
+                {/* Search Results */}
+                {searchResults.length > 0 && (
+                  <div className="search-results-list">
+                    {searchResults.map(resUser => {
+                      const isFriend = friends.some(f => f._id === resUser._id);
+                      return (
+                        <div key={resUser._id} className="user-result-item">
+                          <div className="user-info-basic">
+                            <img 
+                              src={resUser.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${resUser.name}`} 
+                              alt={resUser.name} 
+                              className="user-avatar-small"
+                            />
+                            <div className="user-text-info">
+                              <span className="user-res-name">{resUser.name}</span>
+                              <span className="user-res-email">{resUser.email}</span>
+                            </div>
+                          </div>
+                          {!isFriend ? (
+                            <button className="btn-follow" onClick={() => handleFollow(resUser._id)}>Follow</button>
+                          ) : (
+                            <button className="btn-unfollow" onClick={() => handleUnfollow(resUser._id)}>Following</button>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                  <div className="sp-item-info">
-                    <h4>Biometric Access</h4>
-                    <p>FaceID or Touch ID for sensitive transactions</p>
-                  </div>
-                  <div className="sp-item-action">
-                    <div className="toggle-switch active">
-                      <div className="toggle-circle"></div>
+                )}
+                
+                {searching && <div style={{fontSize: '0.8rem', color: '#64748b', paddingLeft: '10px'}}>Searching database...</div>}
+
+                {/* Following List */}
+                {friends.length > 0 && (
+                  <div className="friends-list-section" style={{marginTop: '10px'}}>
+                    <h4 style={{fontSize: '0.85rem', marginBottom: '15px', color: '#1e293b'}}>Your Connections ({friends.length})</h4>
+                    <div className="friends-list-horizontal">
+                      {friends.map(friend => (
+                        <div key={friend._id} className="friend-chip">
+                          <img 
+                            src={friend.picture || `https://api.dicebear.com/7.x/avataaars/svg?seed=${friend.name}`} 
+                            alt={friend.name} 
+                          />
+                          <span>{friend.name.split(' ')[0]}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </div>
 

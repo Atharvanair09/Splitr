@@ -96,3 +96,77 @@ app.use("/expense", expenseRoutes);
 //payment routes
 app.use("/api/payment", paymentRoutes);
 
+// --- USER SEARCH & FRIENDS SYSTEM ---
+
+// 1. Search Users
+app.get("/api/users/search", async (req, res) => {
+  try {
+    const { query, currentUserId } = req.query;
+    
+    if (!query || query.length < 2) {
+      return res.json([]);
+    }
+
+    // Find users by name or email, excluding the current user
+    const users = await User.find({
+      $and: [
+        { _id: { $ne: currentUserId } },
+        {
+          $or: [
+            { name: { $regex: query, $options: "i" } },
+            { email: { $regex: query, $options: "i" } }
+          ]
+        }
+      ]
+    }).limit(10).select("name email picture");
+
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 2. Follow/Add Friend
+app.post("/api/users/follow", async (req, res) => {
+  try {
+    const { userId, targetId } = req.body;
+    
+    if (userId === targetId) return res.status(400).json({ error: "Cannot follow yourself" });
+
+    // Add targetId to userId's friends
+    await User.findByIdAndUpdate(userId, {
+      $addToSet: { friends: targetId }
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 3. Unfollow/Remove Friend
+app.post("/api/users/unfollow", async (req, res) => {
+  try {
+    const { userId, targetId } = req.body;
+
+    await User.findByIdAndUpdate(userId, {
+      $pull: { friends: targetId }
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 4. Get Friends List
+app.get("/api/users/friends/:userId", async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId).populate("friends", "name email picture");
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user.friends);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
