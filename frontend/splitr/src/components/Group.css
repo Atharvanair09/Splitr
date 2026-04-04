@@ -1,0 +1,228 @@
+.create-group-container {
+  min-height: 100vh;
+  background: #F8FAFC;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  padding: 24px;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.create-group-card {
+  background: white;
+  padding: 36px 32px;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 10px 30px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+/* ── Back Button ── */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #64748B;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  margin-bottom: 12px;
+  margin-left: -10px;
+}
+
+.back-btn:hover {
+  background: #F1F5F9;
+  color: #0F172A;
+}
+
+/* ── Header ── */
+.group-form-header {
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.group-icon-badge {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #EEF2FF, #E0E7FF);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: #4361EE;
+}
+
+.title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0F172A;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: #94A3B8;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* ── Divider ── */
+.form-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #E2E8F0, transparent);
+  margin: 24px 0;
+}
+
+/* ── Form Groups ── */
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-size: 0.78rem;
+  color: #475569;
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-group input {
+  padding: 13px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #E2E8F0;
+  outline: none;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  color: #0F172A;
+  background: #FAFBFC;
+}
+
+.form-group input::placeholder {
+  color: #CBD5E1;
+}
+
+.form-group input:focus {
+  border-color: #4361EE;
+  box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.08);
+  background: #fff;
+}
+
+.hint {
+  font-size: 0.72rem;
+  color: #94A3B8;
+  margin-top: 6px;
+  font-style: italic;
+}
+
+/* ── Member Preview Chips ── */
+.member-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 22px;
+  animation: fadeIn 0.3s ease;
+}
+
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 5px;
+  background: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #334155;
+  animation: chipIn 0.25s ease;
+}
+
+@keyframes chipIn {
+  from { opacity: 0; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.chip-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4361EE, #6C48F5);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Create Button ── */
+.create-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #4361EE, #3A52D1);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+}
+
+.create-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3A52D1, #2E44B8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(67, 97, 238, 0.4);
+}
+
+.create-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.create-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Loading Spinner ── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

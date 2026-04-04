@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import './index.css';
 import Signup from './Signup';
 import Login from './Login';
 import Dashboard from './Dashboard';
+import CreateGroup from './components/Group';
 
-function App() {
-  const [view, setView] = useState('signup');
-  const [user, setUser] = useState(null);
-
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    setView('dashboard');
-  };
-
-  if (view === 'dashboard') {
-    return <Dashboard user={user} />;
-  }
-
+function AuthLayout({ children }) {
   return (
     <>
       <div className="page-border" style={{ borderColor: '#6C48F5' }}></div>
@@ -27,11 +17,7 @@ function App() {
         <p className="brand-subtitle">Split Expenses with Friends</p>
       </div>
 
-      {view === 'signup' ? (
-        <Signup onNavigate={setView} onLoginSuccess={handleLoginSuccess} />
-      ) : (
-        <Login onNavigate={setView} onLoginSuccess={handleLoginSuccess} />
-      )}
+      {children}
 
       <div className="sub-footer">
         <div className="node-status">
@@ -59,5 +45,38 @@ function App() {
   );
 }
 
-export default App;
+function App() {
+  const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    navigate('/dashboard');
+  };
+
+  return (
+    <Routes>
+      <Route path="/" element={
+        <AuthLayout>
+          <Signup onNavigate={(view) => navigate(`/${view}`)} onLoginSuccess={handleLoginSuccess} />
+        </AuthLayout>
+      } />
+      <Route path="/signup" element={
+        <AuthLayout>
+          <Signup onNavigate={(view) => navigate(`/${view}`)} onLoginSuccess={handleLoginSuccess} />
+        </AuthLayout>
+      } />
+      <Route path="/login" element={
+        <AuthLayout>
+          <Login onNavigate={(view) => navigate(`/${view}`)} onLoginSuccess={handleLoginSuccess} />
+        </AuthLayout>
+      } />
+      <Route path="/dashboard" element={<Dashboard user={user} />} />
+      <Route path="/dashboard/:id" element={<Dashboard user={user} />} />
+      <Route path="/group" element={<CreateGroup />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+export default App;
