@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const User = require("./models/User");
 const groupRoutes = require("./routes/groupRoutes");
-const expenseRoutes = require("./routes/expenseRoutes");
+const expenseRoutes = require("./routes/expense");
 
 const app = express();
 const PORT = process.env.PORT || 5000;

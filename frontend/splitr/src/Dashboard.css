@@ -397,12 +397,18 @@
 }
 
 .member-avatars .avatar {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   border: 2px solid white;
   margin-left: -8px;
-  background: #CBD5E1;
+  background: linear-gradient(135deg, #4361EE, #6C48F5);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .member-avatars .avatar:first-child {
@@ -594,4 +600,59 @@
 
 .fab:hover {
   background: #152259;
+}
+
+/* Loading State */
+.dashboard-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 400px;
+  gap: 16px;
+  color: #64748B;
+  font-size: 0.9rem;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #E2E8F0;
+  border-top-color: #4361EE;
+  border-radius: 50%;
+  animation: dashSpin 0.7s linear infinite;
+}
+
+@keyframes dashSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty Feed */
+.empty-feed {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #94A3B8;
+  gap: 8px;
+}
+
+.empty-feed p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Expense group tag */
+.expense-group-tag {
+  color: #4361EE;
+  font-weight: 600;
+}
+
+/* Timeline split info */
+.timeline-split {
+  font-size: 0.72rem;
+  color: #94A3B8;
+  margin-top: 4px;
+  font-style: italic;
 }

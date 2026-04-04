@@ -1,12 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import './Dashboard.css';
 import { useNavigate, useParams, Link } from "react-router-dom";
 
-
 function Dashboard({ user }) {
-
   const navigate = useNavigate(); 
   const { id: groupId } = useParams();
+
+  const [groups, setGroups] = useState([]);
+  const [expenses, setExpenses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch groups and expenses on mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch all groups
+        const groupsRes = await fetch("http://localhost:5000/group/all");
+        const groupsData = await groupsRes.json();
+        setGroups(groupsData);
+
+        // Fetch recent expenses
+        const expensesRes = await fetch("http://localhost:5000/expense/all");
+        const expensesData = await expensesRes.json();
+        setExpenses(expensesData);
+
+      } catch (err) {
+        console.error("Failed to fetch dashboard data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Calculate totals from real expenses
+  const totalExpenses = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+
+  // Helper: time ago
+  const timeAgo = (dateStr) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
+
+  // Group icons pool
+  const groupIcons = ['🏖️', '✈️', '🍕', '🏠', '🎮', '🎉', '☂️', '🚗', '📚', '💼'];
 
   return (
     <div className="dashboard-container">
@@ -18,7 +63,7 @@ function Dashboard({ user }) {
         </div>
 
         <nav className="nav-menu">
-          <Link to="/dashboard/1" className="nav-item active">
+          <Link to="/dashboard" className="nav-item active">
             <span className="nav-icon">⊞</span>
             Dashboard
           </Link>
@@ -47,7 +92,7 @@ function Dashboard({ user }) {
         <div className="sidebar-footer">
           <button 
             className="btn-expense"
-            onClick={() => navigate(`/add-expense/${groupId}`)}
+            onClick={() => navigate(`/add-expense/${groupId || 'new'}`)}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" />
@@ -63,7 +108,7 @@ function Dashboard({ user }) {
         <header className="top-header">
           <div className="search-bar">
             <span>🔍</span>
-            <input type="text" placeholder="Search archive..." />
+            <input type="text" placeholder="Search groups, expenses..." />
           </div>
           
           <div className="header-nav">
@@ -72,7 +117,6 @@ function Dashboard({ user }) {
           </div>
 
           <div className="header-actions">
-            {/* ✅ FIXED BUTTON */}
             <button 
               className="btn-new-group"
               onClick={() => navigate("/group")}
@@ -81,7 +125,6 @@ function Dashboard({ user }) {
             </button>
 
             <span style={{ fontSize: '1.2rem', color: '#64748B' }}>🔔</span>
-            <span style={{ fontSize: '1.2rem', color: '#64748B' }}>🗃️</span>
 
             <div className="user-profile">
               <img 
@@ -92,105 +135,154 @@ function Dashboard({ user }) {
           </div>
         </header>
 
-        <div className="dashboard-grid">
-          {/* Left Column */}
-          <div className="left-column">
-            
-            <div className="balance-card">
-              <div className="balance-label">Net Archive Balance</div>
-              <div className="balance-amount">$2,480.50</div>
-              <div className="balance-details">
-                <div>
-                  <div className="balance-label">You Are Owed</div>
-                  <div className="detail-amount">$3,120.00</div>
-                </div>
-                <div>
-                  <div className="balance-label">You Owe</div>
-                  <div className="detail-amount" style={{ color: '#94A3B8' }}>
-                    $639.50
+        {loading ? (
+          <div className="dashboard-loading">
+            <div className="loading-spinner"></div>
+            <p>Loading your data...</p>
+          </div>
+        ) : (
+          <div className="dashboard-grid">
+            {/* Left Column */}
+            <div className="left-column">
+              
+              {/* Balance Card - real data */}
+              <div className="balance-card">
+                <div className="balance-label">Total Expenses</div>
+                <div className="balance-amount">₹{totalExpenses.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                <div className="balance-details">
+                  <div>
+                    <div className="balance-label">Groups</div>
+                    <div className="detail-amount">{groups.length}</div>
+                  </div>
+                  <div>
+                    <div className="balance-label">Transactions</div>
+                    <div className="detail-amount">{expenses.length}</div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="section-header">
-              <h3 className="section-title">Recent Groups</h3>
-              <span className="view-all">View All</span>
-            </div>
-
-            <div className="groups-grid">
-
-              {/* 🔥 Clickable Group Card */}
-              <div 
-                className="group-card"
-                onClick={() => navigate("/dashboard/123")}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="group-header">
-                  <div className="group-icon">☂️</div>
-                  <span className="status-badge status-active">Active</span>
-                </div>
-                <h4 className="group-name">Iceland Expedition</h4>
-                <div className="group-meta">4 Members • Last activity 2h ago</div>
-                <div className="group-footer">
-                  <div className="member-avatars">
-                    <div className="avatar"></div>
-                    <div className="avatar"></div>
-                    <div className="avatar more">+2</div>
-                  </div>
-                  <div className="group-balance balance-positive">+$142.00</div>
-                </div>
+              {/* Groups Section */}
+              <div className="section-header">
+                <h3 className="section-title">Your Groups</h3>
+                <span className="view-all" onClick={() => navigate("/group")}>+ New Group</span>
               </div>
 
-              {/* Create Group Card */}
-              <div 
-                className="create-group-card"
-                onClick={() => navigate("/group")}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="create-icon">+</div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 800 }}>
-                  Create Archive
+              <div className="groups-grid">
+                {groups.length === 0 ? (
+                  <div 
+                    className="create-group-card"
+                    onClick={() => navigate("/group")}
+                    style={{ cursor: "pointer", gridColumn: "1 / -1" }}
+                  >
+                    <div className="create-icon">+</div>
+                    <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#64748B' }}>
+                      No groups yet — Create your first group
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {groups.map((group, index) => (
+                      <div 
+                        key={group._id}
+                        className="group-card"
+                        onClick={() => navigate(`/dashboard/${group._id}`)}
+                        style={{ cursor: "pointer" }}
+                      >
+                        <div className="group-header">
+                          <div className="group-icon">{groupIcons[index % groupIcons.length]}</div>
+                          <span className="status-badge status-active">Active</span>
+                        </div>
+                        <h4 className="group-name">{group.name}</h4>
+                        <div className="group-meta">
+                          {group.members.length} Members • {timeAgo(group.createdAt)}
+                        </div>
+                        <div className="group-footer">
+                          <div className="member-avatars">
+                            {group.members.slice(0, 3).map((member, i) => (
+                              <div key={i} className="avatar" title={member}>
+                                {member.charAt(0).toUpperCase()}
+                              </div>
+                            ))}
+                            {group.members.length > 3 && (
+                              <div className="avatar more">+{group.members.length - 3}</div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+
+                    {/* Create Group Card */}
+                    <div 
+                      className="create-group-card"
+                      onClick={() => navigate("/group")}
+                      style={{ cursor: "pointer" }}
+                    >
+                      <div className="create-icon">+</div>
+                      <div style={{ fontSize: '0.75rem', fontWeight: 800 }}>
+                        Create Group
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="right-column">
+              
+              {/* Quick Stats */}
+              <div className="ai-insight-top">
+                <div className="ai-header">
+                  <span>📊</span> Quick Overview
                 </div>
+                <h3 className="ai-title">
+                  {groups.length} group{groups.length !== 1 ? 's' : ''}, {expenses.length} expense{expenses.length !== 1 ? 's' : ''} tracked
+                </h3>
+                <button className="btn-ai" onClick={() => navigate("/group")}>Create New Group</button>
+              </div>
+
+              {/* Recent Expenses Feed */}
+              <div className="feed-card">
+                <h3 className="feed-title">Recent Expenses</h3>
+
+                {expenses.length === 0 ? (
+                  <div className="empty-feed">
+                    <span style={{ fontSize: '2rem' }}>📭</span>
+                    <p>No expenses yet. Add your first one!</p>
+                  </div>
+                ) : (
+                  <div className="timeline">
+                    {expenses.slice(0, 10).map((expense) => (
+                      <div key={expense._id} className="timeline-item">
+                        <div className="timeline-dot"></div>
+                        <div className="timeline-time">
+                          {timeAgo(expense.createdAt)}
+                        </div>
+                        <div className="timeline-content">
+                          <strong>{expense.paidBy}</strong> paid
+                          {expense.notes ? ` for "${expense.notes}"` : ''}
+                          {expense.groupId?.name && (
+                            <span className="expense-group-tag"> in {expense.groupId.name}</span>
+                          )}
+                        </div>
+                        <div className="timeline-amount">₹{expense.amount.toLocaleString('en-IN')}</div>
+                        {expense.splitBetween.length > 0 && (
+                          <div className="timeline-split">
+                            Split between {expense.splitBetween.join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
             </div>
           </div>
-
-          {/* Right Column */}
-          <div className="right-column">
-            
-            <div className="ai-insight-top">
-              <div className="ai-header">
-                <span>✨</span> AI Insight
-              </div>
-              <h3 className="ai-title">
-                3 transactions are ready for AI optimization.
-              </h3>
-              <button className="btn-ai">View Intelligence</button>
-            </div>
-
-            <div className="feed-card">
-              <h3 className="feed-title">Intelligence Feed</h3>
-
-              <div className="timeline">
-                <div className="timeline-item">
-                  <div className="timeline-dot"></div>
-                  <div className="timeline-time">Today, 2:45 PM</div>
-                  <div className="timeline-content">
-                    <strong>Sarah Chen</strong> added "Grocery Run".
-                  </div>
-                  <div className="timeline-amount">+$12.50</div>
-                </div>
-              </div>
-
-            </div>
-
-          </div>
-        </div>
+        )}
       </main>
 
-      <div className="fab">
+      <div className="fab" onClick={() => navigate(`/add-expense/${groupId || 'new'}`)}>
         <span style={{ fontSize: '1.2rem' }}>+</span>
       </div>
     </div>

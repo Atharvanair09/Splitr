@@ -1,0 +1,533 @@
+/* ── Group Detail Page ── */
+
+.gd-page {
+  min-height: 100vh;
+  background: #F4F6FF;
+  font-family: 'Inter', sans-serif;
+  padding: 2rem 3rem;
+  animation: gdFadeIn 0.4s ease;
+}
+
+@keyframes gdFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ── Loading ── */
+.gd-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 60vh;
+  gap: 16px;
+  color: #64748B;
+}
+
+.gd-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #E2E8F0;
+  border-top-color: #4361EE;
+  border-radius: 50%;
+  animation: gdSpin 0.7s linear infinite;
+}
+
+@keyframes gdSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Top Bar ── */
+.gd-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.gd-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid #E2E8F0;
+  color: #64748B;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+}
+
+.gd-btn-back:hover {
+  background: #F8FAFC;
+  color: #0B132B;
+  border-color: #CBD5E1;
+}
+
+.gd-btn-add-expense {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0B132B;
+  color: white;
+  border: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px rgba(11, 19, 43, 0.2);
+}
+
+.gd-btn-add-expense:hover {
+  background: #152259;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(11, 19, 43, 0.3);
+}
+
+/* ── Header Card ── */
+.gd-header-card {
+  background: #0B132B;
+  color: white;
+  border-radius: 16px;
+  padding: 2rem 2.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(11, 19, 43, 0.15);
+}
+
+.gd-header-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(circle, rgba(67,97,238,0.2) 0%, rgba(11,19,43,0) 70%);
+  transform: translate(30%, -30%);
+  pointer-events: none;
+}
+
+.gd-group-name {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  letter-spacing: -0.02em;
+}
+
+.gd-group-meta {
+  font-size: 0.82rem;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.gd-header-stats {
+  display: flex;
+  gap: 2.5rem;
+  z-index: 1;
+}
+
+.gd-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.gd-stat-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.gd-stat-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+/* ── Content Grid ── */
+.gd-content-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.5rem;
+}
+
+/* ── Cards ── */
+.gd-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  margin-bottom: 1.5rem;
+}
+
+.gd-card-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0B132B;
+  margin: 0 0 1.2rem 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ── Members List ── */
+.gd-members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.gd-member-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 10px;
+  transition: background 0.15s ease;
+}
+
+.gd-member-row:hover {
+  background: #F8FAFC;
+}
+
+.gd-member-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.gd-member-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4361EE, #6C48F5);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gd-member-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.gd-member-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #0B132B;
+}
+
+.gd-member-paid {
+  font-size: 0.72rem;
+  color: #94A3B8;
+  margin-top: 2px;
+}
+
+.gd-member-right {
+  display: flex;
+  gap: 6px;
+}
+
+/* ── Badges ── */
+.gd-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.gd-badge-green {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.gd-badge-red {
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
+.gd-badge-neutral {
+  background: #F1F5F9;
+  color: #64748B;
+}
+
+/* ── Balance List (Who Owes Whom) ── */
+.gd-balance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gd-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #FAFBFC;
+  border: 1px solid #F1F5F9;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.gd-balance-row:hover {
+  border-color: #E2E8F0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.gd-balance-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.gd-balance-avatars {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gd-balance-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.gd-avatar-from {
+  background: #EF4444;
+}
+
+.gd-avatar-to {
+  background: #10B981;
+}
+
+.gd-arrow-icon {
+  flex-shrink: 0;
+}
+
+.gd-balance-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.gd-balance-names {
+  font-size: 0.85rem;
+  color: #1E293B;
+}
+
+.gd-balance-names strong {
+  font-weight: 700;
+  color: #0B132B;
+}
+
+.gd-balance-amount {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0B132B;
+  margin-top: 2px;
+}
+
+/* ── Settle Button ── */
+.gd-btn-settle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #10B981;
+  color: white;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: 0.02em;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.gd-btn-settle:hover:not(:disabled) {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.gd-btn-settle:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.gd-btn-settle.settling {
+  background: #94A3B8;
+  box-shadow: none;
+}
+
+.gd-btn-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: gdSpin 0.6s linear infinite;
+}
+
+/* ── Empty State ── */
+.gd-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #94A3B8;
+  gap: 8px;
+  text-align: center;
+}
+
+.gd-empty p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ── Expense History ── */
+.gd-expense-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gd-expense-item {
+  padding: 14px 16px;
+  background: #FAFBFC;
+  border: 1px solid #F1F5F9;
+  border-radius: 12px;
+  transition: all 0.15s ease;
+}
+
+.gd-expense-item:hover {
+  border-color: #E2E8F0;
+}
+
+.gd-expense-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.gd-expense-payer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.gd-expense-payer-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4361EE, #6C48F5);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gd-expense-payer-name {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0B132B;
+  display: block;
+}
+
+.gd-expense-time {
+  font-size: 0.68rem;
+  color: #94A3B8;
+  display: block;
+  margin-top: 1px;
+}
+
+.gd-expense-amount {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0B132B;
+}
+
+.gd-expense-notes {
+  font-size: 0.82rem;
+  color: #64748B;
+  font-style: italic;
+  margin-bottom: 6px;
+  padding-left: 40px;
+}
+
+.gd-expense-split {
+  font-size: 0.72rem;
+  color: #94A3B8;
+  padding-left: 40px;
+}
+
+.gd-expense-per-person {
+  font-weight: 600;
+  color: #64748B;
+  margin-left: 4px;
+}
+
+/* ── Responsive ── */
+@media (max-width: 800px) {
+  .gd-page {
+    padding: 1rem;
+  }
+
+  .gd-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+
+  .gd-header-stats {
+    align-self: stretch;
+  }
+
+  .gd-stat {
+    align-items: flex-start;
+  }
+
+  .gd-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .gd-balance-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .gd-btn-settle {
+    width: 100%;
+    justify-content: center;
+  }
+}
