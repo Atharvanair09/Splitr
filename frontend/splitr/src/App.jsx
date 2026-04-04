@@ -95,6 +95,7 @@ function App() {
         </AuthLayout>
       } />
       <Route path="/dashboard" element={<Dashboard user={user} />} />
+      <Route path="/groups" element={<Dashboard user={user} />} />
       <Route path="/dashboard/:id" element={<GroupDetail user={user} />} />
       <Route path="/group" element={<CreateGroup user={user} />} />
       <Route path="/account" element={<Account user={user} onLogout={handleLogout} />} />

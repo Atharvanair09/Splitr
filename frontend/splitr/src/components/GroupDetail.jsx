@@ -1,6 +1,42 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import "./GroupDetail.css";
+
+const MemberRow = ({ m, currentUser }) => {
+  let badgeClass = '';
+  let barColor = '';
+  if (m.status === 'Paid') {
+    badgeClass = 'bg-green-light text-green';
+    barColor = '#10B981';
+  } else if (m.status === 'Partial') {
+    badgeClass = 'bg-orange-light text-orange';
+    barColor = '#F59E0B';
+  } else {
+    badgeClass = 'bg-red-light text-red';
+    barColor = '#E2E8F0'; 
+  }
+
+  return (
+    <div className="insight-member-row">
+      <div className="insight-member-left">
+        <div className="member-avatar">{m.name.charAt(0).toUpperCase()}</div>
+        <div className="member-name" title={m.name}>
+          {m.name} {m.name === currentUser ? <span className="member-you">(you)</span> : ''}
+        </div>
+      </div>
+      
+      <div className="member-progress-container">
+         <div className="member-progress-bar" style={{ width: `${m.progress}%`, backgroundColor: barColor }}></div>
+      </div>
+
+      <div className="insight-member-right">
+        <div className="member-amount">₹{m.paid.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
+        <span className={`member-badge ${badgeClass}`}>{m.status}</span>
+      </div>
+    </div>
+  );
+};
 
 function GroupDetail({ user }) {
   const { id } = useParams();
@@ -116,6 +152,88 @@ function GroupDetail({ user }) {
   };
 
   const { netBalances, memberTotals } = calculateBalances();
+
+  // Financial Insights specific calculations for current user AND group members
+  const currentUser = user?.name || "Arjun Rao";
+  const { totalShare, totalPaid, pendingValue, paidMembers, partialMembers, pendingMembers } = useMemo(() => {
+    if (!group || !expenses) return { totalShare: 0, totalPaid: 0, pendingValue: 0, paidMembers: [], partialMembers: [], pendingMembers: [] };
+    
+    let tShare = 0;
+    let tPaid = 0;
+
+    const mData = {};
+    group.members.forEach(m => {
+      mData[m] = { name: m, paid: 0, share: 0 };
+    });
+
+    expenses.forEach(exp => {
+      const amount = exp.amount || 0;
+      const splitLen = exp.splitBetween?.length || 1;
+      const splitAmount = amount / splitLen;
+
+      if (exp.paidBy && mData[exp.paidBy]) {
+        mData[exp.paidBy].paid += amount;
+      }
+
+      if (exp.splitBetween) {
+        exp.splitBetween.forEach(m => {
+          if (mData[m]) mData[m].share += splitAmount;
+        });
+        if (exp.splitBetween.includes(currentUser)) {
+          tShare += splitAmount;
+        }
+      }
+
+      if (exp.paidBy === currentUser) {
+        tPaid += amount;
+      }
+    });
+
+    let p = Math.max(0, tShare - tPaid);
+
+    Object.values(mData).forEach(m => {
+      if (m.paid >= m.share && m.share > 0) m.status = 'Paid';
+      else if (m.paid > 0 && m.paid < m.share) m.status = 'Partial';
+      else if (m.paid > 0 && m.share === 0) m.status = 'Paid'; 
+      else m.status = 'Due';
+      
+      m.progress = m.share > 0 
+        ? Math.min(100, Math.round((m.paid / m.share) * 100)) 
+        : (m.paid > 0 ? 100 : 0);
+    });
+
+    const paidArray = Object.values(mData).filter(m => m.status === 'Paid').sort((a,b) => b.paid - a.paid);
+    const partialArray = Object.values(mData).filter(m => m.status === 'Partial').sort((a,b) => b.paid - a.paid);
+    const pendingArray = Object.values(mData).filter(m => m.status === 'Due').sort((a,b) => b.paid - a.paid);
+
+    return { totalShare: tShare, totalPaid: tPaid, pendingValue: p, paidMembers: paidArray, partialMembers: partialArray, pendingMembers: pendingArray };
+  }, [group, expenses, currentUser]);
+
+  const chartPaid = Math.min(totalPaid, Math.max(totalShare, 1)); 
+  const chartPending = pendingValue;
+
+  let chartData = [];
+  if (totalShare === 0 && totalPaid === 0) {
+    chartData = [{ name: 'No Data', value: 1 }];
+  } else {
+    chartData = [
+      { name: 'Paid', value: chartPaid },
+      { name: 'Remaining', value: chartPending }
+    ];
+  }
+
+  const COLORS = ['#10B981', '#EF4444'];
+  if (totalShare === 0 && totalPaid === 0) COLORS[0] = '#E2E8F0';
+
+  let paidPercentage = 0;
+  if (totalShare > 0) {
+    if (totalPaid >= totalShare) paidPercentage = 100;
+    else paidPercentage = Math.round((totalPaid / totalShare) * 100);
+  } else if (totalPaid > 0) {
+    paidPercentage = 100;
+  }
+  const remainingPercentage = (totalShare > 0 && totalPaid < totalShare) ? 100 - paidPercentage : 0;
+
 
   // Total group spend
   const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -418,6 +536,106 @@ function GroupDetail({ user }) {
                 })}
               </div>
             )}
+          </div>
+
+          {/* Financial Insights Card directly below Who Owes Whom */}
+          <div className="gd-card">
+            <h3 className="gd-card-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight: '8px'}}>
+                <path d="M21 12A9 9 0 1 1 3 12a9 9 0 0 1 18 0z" />
+                <path d="M12 3v9h9" />
+              </svg>
+              Your financial insights
+            </h3>
+
+            <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '1rem' }}>
+              <ResponsiveContainer width="100%" height={220}>
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={90}
+                    paddingAngle={0}
+                    dataKey="value"
+                    stroke="none"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                </PieChart>
+              </ResponsiveContainer>
+              <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0F172A' }}>
+                  ₹{totalShare.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#64748B', fontWeight: 500 }}>your share</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', marginTop: '0.5rem', marginBottom: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', fontWeight: 500, color: '#475569' }}>
+                <span style={{ width: '12px', height: '12px', borderRadius: '2px', backgroundColor: '#10B981' }}></span>
+                Paid {totalPaid > 0 ? `— ₹${totalPaid.toLocaleString()} (${paidPercentage}%)` : ''}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.85rem', fontWeight: 500, color: '#475569' }}>
+                <span style={{ width: '12px', height: '12px', borderRadius: '2px', backgroundColor: '#EF4444' }}></span>
+                Remaining {pendingValue > 0 ? `— ₹${pendingValue.toLocaleString()} (${remainingPercentage}%)` : ''}
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <div style={{ flex: 1, background: '#F8FAFC', borderRadius: '12px', padding: '1rem' }}>
+                <div style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600, marginBottom: '0.25rem' }}>Already paid</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#10B981' }}>₹{totalPaid.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
+              </div>
+              <div style={{ flex: 1, background: '#F8FAFC', borderRadius: '12px', padding: '1rem' }}>
+                <div style={{ fontSize: '0.8rem', color: '#64748B', fontWeight: 600, marginBottom: '0.25rem' }}>Still owe</div>
+                <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#EF4444' }}>₹{pendingValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</div>
+              </div>
+            </div>
+
+            <hr style={{ border: 'none', borderTop: '1px solid #E2E8F0', margin: '2rem 0 1rem 0' }} />
+
+            <div className="gd-members-list" style={{ display: 'flex', flexDirection: 'column' }}>
+              
+              {paidMembers.length > 0 && (
+                <>
+                  <h4 className="members-section-title">PAID</h4>
+                  {paidMembers.map((m, i) => <MemberRow key={`paid-${i}`} m={m} currentUser={currentUser} />)}
+                </>
+              )}
+              
+              {partialMembers.length > 0 && (
+                <>
+                  <h4 className="members-section-title">PARTIAL</h4>
+                  {partialMembers.map((m, i) => <MemberRow key={`partial-${i}`} m={m} currentUser={currentUser} />)}
+                </>
+              )}
+              
+              {pendingMembers.length > 0 && (
+                <>
+                  <h4 className="members-section-title">PENDING</h4>
+                  {pendingMembers.map((m, i) => <MemberRow key={`pending-${i}`} m={m} currentUser={currentUser} />)}
+                </>
+              )}
+              
+              {paidMembers.length === 0 && partialMembers.length === 0 && pendingMembers.length === 0 && (
+                <div style={{ textAlign: 'center', color: '#94A3B8', fontSize: '0.85rem', padding: '1rem' }}>No members found.</div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '1rem' }}>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <polyline points="19 12 12 19 5 12"></polyline>
+                  </svg>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
 

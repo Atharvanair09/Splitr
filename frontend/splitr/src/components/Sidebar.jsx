@@ -16,7 +16,7 @@ function Sidebar({ activePage, children }) {
           Dashboard
         </Link>
 
-        <Link to="/group" className={`sidebar-nav-item ${activePage === 'groups' ? 'active' : ''}`}>
+        <Link to="/groups" className={`sidebar-nav-item ${activePage === 'groups' ? 'active' : ''}`}>
           <span className="sidebar-nav-icon">👥</span>
           Groups
         </Link>
