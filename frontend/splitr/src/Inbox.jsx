@@ -59,6 +59,7 @@ function Inbox({ user }) {
           paidBy: user.name,
           splitBetween: [user.name], // Default to self, user can edit in activity later or we can refine
           notes: `${tx.type.toUpperCase()}: ${tx.subject}`,
+          gmailMessageId: tx.id,
         }),
       });
 

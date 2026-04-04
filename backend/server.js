@@ -4,6 +4,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const User = require("./models/User");
+const Expense = require("./models/Expense");
 const groupRoutes = require("./routes/groupRoutes");
 const expenseRoutes = require("./routes/expense");
 const paymentRoutes = require("./routes/payment");
@@ -104,7 +105,14 @@ app.use("/api/auth/gmail", authRouter);
 app.get("/api/transactions", async (req, res) => {
   try {
     const transactions = await fetchTransactionEmails();
-    res.json(transactions);
+    
+    // Find all Gmail IDs already processed
+    const processedIds = await Expense.find({ gmailMessageId: { $ne: null } }).distinct("gmailMessageId");
+    
+    // Filter out transactions that exist in database
+    const filtered = transactions.filter(tx => !processedIds.includes(tx.id));
+    
+    res.json(filtered);
   } catch (err) {
     console.error("Fetch transactions error:", err);
     res.status(500).json({ error: "Failed to fetch transactions from Gmail" });

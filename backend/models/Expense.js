@@ -28,6 +28,9 @@ const expenseSchema = new mongoose.Schema({
   notes: {
     type: String,
   },
+  gmailMessageId: {
+    type: String,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Expense", expenseSchema);
