@@ -430,6 +430,7 @@
 
 .epc-amount {
   background: linear-gradient(135deg, #0F172A 0%, #4361EE 100%);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 900;
@@ -478,4 +479,118 @@
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+/* ── Itemized Split Area ── */
+.itemized-split-section {
+  animation: cardSlideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+}
+
+.receipt-item-row {
+  transition: all 0.2s ease;
+}
+
+.receipt-item-row:hover {
+  background: white;
+  transform: translateX(4px);
+}
+
+.item-member-assign button {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.item-member-assign button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.08);
+}
+
+.item-member-assign button:active {
+  transform: scale(0.95);
+}
+
+/* ── Member Selection Area ── */
+.member-toggle-chip {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: 1.5px solid #E2E8F0;
+  background: transparent;
+  color: #64748B;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+}
+
+.member-toggle-chip:hover {
+  border-color: #CBD5E1;
+  background: rgba(0, 0, 0, 0.02);
+  transform: translateY(-1px);
+}
+
+.member-toggle-chip.active {
+  border-color: #4361EE;
+  background: rgba(67, 97, 238, 0.1);
+  color: #4361EE;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.1);
+}
+
+.member-toggle-chip.active:hover {
+  background: rgba(67, 97, 238, 0.15);
+  transform: translateY(-1px);
+}
+
+.member-toggle-chip::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #CBD5E1;
+  transition: all 0.25s ease;
+}
+
+.member-toggle-chip.active::before {
+  background: #4361EE;
+  box-shadow: 0 0 8px rgba(67, 97, 238, 0.5);
+}
+
+/* ── Split Group All Button ── */
+.split-group-all-btn {
+  background: #4361EE;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 4px 12px rgba(67, 97, 238, 0.25);
+}
+
+.split-group-all-btn:hover {
+  background: #3651d1;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(67, 97, 238, 0.35);
+}
+
+.split-group-all-btn:active {
+  transform: translateY(0);
+}
+
+.split-group-all-btn svg {
+  transition: transform 0.3s ease;
+}
+
+.split-group-all-btn:hover svg {
+  transform: scale(1.1);
 }

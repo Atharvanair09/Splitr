@@ -18,6 +18,8 @@ function UnifiedAddExpense({ user, onLogout }) {
   const [userGroups, setUserGroups] = useState([]);
   const [selectedGroupId, setSelectedGroupId] = useState(id || "");
   const [groupMembers, setGroupMembers] = useState([]);
+  const [receiptItems, setReceiptItems] = useState([]);
+  const [itemAssignments, setItemAssignments] = useState({}); // { itemIndex: [memberName1, memberName2] }
 
   // 1. Fetch available groups on mount
   React.useEffect(() => {
@@ -188,24 +190,23 @@ The group members are: ${groupMembers.join(", ")}.
 Try to map any mentioned names in the input to these specific members.` : "No group context provided yet."}
 
 --- RULES ---
-1. Extract "amount", "title", "paidBy", and "between".
+1. Extract "amount", "title", "paidBy", "between", and "items".
 2. IMPORTANT: If the user uses first-person pronouns (e.g., "I paid", "me", "my share"), map them TO THE CURRENT USER'S NAME: "${user?.name}".
-3. If the user describes an uneven split (e.g. "I paid 1000, Rahul owes 200, Amit owes 800"), calculate individual amounts.
-3. If they say "split equally", divide the amount among the "between" list.
+3. Extract ALL visible "items" with their "name" and "price" if it's a receipt.
 4. "paidBy" must be ONE name. "between" must be an ARRAY of names.
 5. Return ONLY valid JSON:
 {
-  "category": "e.g. DINING, TRAVEL, GROCERIES",
+  "category": "string",
   "amount": number,
-  "currency": "₹",
-  "title": "short relevant title",
-  "confidence": number 0-100,
-  "paidBy": "string (name)",
+  "currency": "string",
+  "title": "string",
+  "confidence": number,
+  "paidBy": "string",
   "splitType": "Uneven" or "Equal",
   "between": ["name1", "name2"],
+  "items": [{"name": "string", "price": number}],
   "splitDetails": [
-    {"name": "name1", "amount": 200},
-    {"name": "name2", "amount": 800}
+    {"name": "string", "amount": number}
   ]
 }`
           }, {
@@ -233,6 +234,7 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
       if(parsed.between && Array.isArray(parsed.between)) setSplitBetween(parsed.between.join(", "));
       if(parsed.splitDetails && Array.isArray(parsed.splitDetails)) setSplitDetails(parsed.splitDetails);
       if(parsed.title) setNotes(parsed.title);
+      if(parsed.items && Array.isArray(parsed.items)) setReceiptItems(parsed.items);
 
     } catch (error) {
        console.error("OpenRouter Error:", error);
@@ -240,6 +242,69 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
     } finally {
        setIsChatLoading(false);
     }
+  };
+
+  const handleSplitWithAllGroupMembers = () => {
+    if (groupMembers.length > 0) {
+      setSplitBetween(groupMembers.join(", "));
+      setSplitDetails([]); // Reset uneven split details to fallback to equal split
+    } else {
+      alert("Please select a group first or ensure the group has members.");
+    }
+  };
+
+  const handleToggleMember = (name) => {
+    const lowerName = name.toLowerCase();
+    const currentList = splitBetween.split(",").map(m => m.trim()).filter(m => m !== "");
+    const exists = currentList.some(m => m.toLowerCase() === lowerName);
+
+    let updated;
+    if (exists) {
+      updated = currentList.filter(m => m.toLowerCase() !== lowerName);
+    } else {
+      updated = [...currentList, name];
+    }
+    
+    setSplitBetween(updated.join(", "));
+    setSplitDetails([]); // Reset uneven splits to fallback to equal
+  };
+
+  const handleToggleItemAssignment = (itemIndex, memberName) => {
+    setItemAssignments(prev => {
+      const current = prev[itemIndex] || [];
+      const updated = current.includes(memberName)
+        ? current.filter(n => n !== memberName)
+        : [...current, memberName];
+      
+      const newAssignments = { ...prev, [itemIndex]: updated };
+      
+      // Auto-calculate splitDetails based on assignments
+      const memberTotals = {};
+      receiptItems.forEach((item, idx) => {
+        const assigned = newAssignments[idx] || [];
+        if (assigned.length > 0) {
+          const share = item.price / assigned.length;
+          assigned.forEach(n => {
+            memberTotals[n] = (memberTotals[n] || 0) + share;
+          });
+        }
+      });
+
+      const newSplitDetails = Object.keys(memberTotals).map(name => ({
+        name,
+        amount: parseFloat(memberTotals[name].toFixed(2))
+      }));
+      
+      setSplitDetails(newSplitDetails);
+      
+      // Also update the comma-separated splitBetween for the main form
+      const uniqueMembers = Object.keys(memberTotals);
+      if (uniqueMembers.length > 0) {
+        setSplitBetween(uniqueMembers.join(", "));
+      }
+
+      return newAssignments;
+    });
   };
 
   const handleSend = () => {
@@ -449,15 +514,30 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
                             
                             <div className="epc-row">
                               <label>Breakdown</label>
-                              <div className="epc-value">
+                              <div className="epc-value" style={{flexDirection: 'column', alignItems: 'flex-end'}}>
                                 {d.splitDetails?.map((item, idx) => (
-                                  <div key={idx} style={{fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', width: '100%'}}>
+                                  <div key={idx} style={{fontSize: '0.75rem', display: 'flex', justifyContent: 'space-between', width: '100%', gap: '20px'}}>
                                     <span>{item.name}:</span>
                                     <span style={{fontWeight: '700'}}>{d.currency || "₹"}{item.amount}</span>
                                   </div>
                                 ))}
                               </div>
                             </div>
+                          </div>
+
+                          <div className="epc-footer" style={{marginTop: '15px', paddingTop: '15px', borderTop: '1.5px dashed #e2e8f0'}}>
+                            <button 
+                              className="split-group-all-btn"
+                              onClick={handleSplitWithAllGroupMembers}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                              </svg>
+                              Split with all {groupMembers.length} members
+                            </button>
                           </div>
                           
                         </div>
@@ -614,6 +694,27 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
                 </div>
               </div>
 
+              {/* Interactive Member Selection */}
+              {groupMembers.length > 0 && (
+                <div className="member-selection-area" style={{marginTop: '15px'}}>
+                  <label className="expense-label" style={{fontSize: '0.65rem', opacity: 0.8}}>Quick Select Members:</label>
+                  <div className="member-toggle-grid" style={{display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '8px'}}>
+                    {groupMembers.map((m, idx) => {
+                      const isActive = memberList.some(name => name.toLowerCase() === m.toLowerCase());
+                      return (
+                        <button
+                          key={idx}
+                          className={`member-toggle-chip ${isActive ? 'active' : ''}`}
+                          onClick={() => handleToggleMember(m)}
+                        >
+                          {m}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
               {/* Member chips preview */}
               {memberList.length > 0 && (
                 <div className="split-preview" style={{marginTop: '20px'}}>
@@ -640,6 +741,61 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
                         </div>
                       );
                     })}
+                  </div>
+                </div>
+              )}
+
+              {/* Itemized Receipt Mode */}
+              {receiptItems.length > 0 && (
+                <div className="itemized-split-section" style={{marginTop: '30px', padding: '20px', background: '#F8FAFC', borderRadius: '16px', border: '1.5px solid #E2E8F0'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
+                    <h3 style={{fontSize: '0.9rem', fontWeight: '800', color: '#0F172A', margin: 0}}>ASSIGN ITEMS FROM RECEIPT</h3>
+                    <button 
+                      onClick={() => { setReceiptItems([]); setItemAssignments({}); }}
+                      style={{fontSize: '0.7rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 'bold'}}
+                    >
+                      Clear Items
+                    </button>
+                  </div>
+                  
+                  <div className="receipt-items-list" style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                    {receiptItems.map((item, i) => (
+                      <div key={i} className="receipt-item-row" style={{paddingBottom: '12px', borderBottom: '1px solid #e2e8f0'}}>
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '8px'}}>
+                          <span style={{fontSize: '0.85rem', fontWeight: '700', color: '#1E293B'}}>{item.name}</span>
+                          <span style={{fontSize: '0.85rem', fontWeight: '800', color: '#4361EE'}}>₹{item.price}</span>
+                        </div>
+                        
+                        <div className="item-member-assign" style={{display: 'flex', flexWrap: 'wrap', gap: '6px'}}>
+                          {groupMembers.map((m, idx) => {
+                            const isAssigned = (itemAssignments[i] || []).includes(m);
+                            return (
+                              <button
+                                key={idx}
+                                onClick={() => handleToggleItemAssignment(i, m)}
+                                style={{
+                                  padding: '4px 10px',
+                                  borderRadius: '12px',
+                                  fontSize: '0.65rem',
+                                  fontWeight: '800',
+                                  border: isAssigned ? '1.5px solid #4361EE' : '1.5px solid #e2e8f0',
+                                  background: isAssigned ? '#4361EE' : 'white',
+                                  color: isAssigned ? 'white' : '#64748B',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s ease'
+                                }}
+                              >
+                                {m}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{marginTop: '15px', padding: '10px', background: '#EEF2FF', borderRadius: '10px', fontSize: '0.75rem', color: '#4338CA', fontWeight: '700'}}>
+                    💡 Selecting a member under an item assigns that item's cost to them. If multiple members are selected, the cost is split equally among them.
                   </div>
                 </div>
               )}

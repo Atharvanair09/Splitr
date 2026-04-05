@@ -141,7 +141,7 @@ function Settings({ user, onLogout }) {
   return (
     <div className="settings-dashboard-container">
       <Sidebar activePage="settings">
-        <button className="sidebar-btn-expense">GENERATE REPORT</button>
+        {/* <button className="sidebar-btn-expense">GENERATE REPORT</button> */}
         <button className="sidebar-btn-signout" onClick={onLogout}>
           <span className="nav-icon" style={{marginRight: '5px'}}>▷</span> SIGN OUT
         </button>
