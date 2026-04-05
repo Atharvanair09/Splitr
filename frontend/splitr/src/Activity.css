@@ -956,3 +956,239 @@
     font-size: 0.7rem;
   }
 }
+
+/* --- Inbox Specific Styles --- */
+.btn-connect {
+  background: #fff;
+  color: #10b981;
+  border: 1px solid #10b981;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-right: 10px !important;
+  transition: all 0.2s;
+}
+
+.btn-connect:hover {
+  background: #ecfdf5;
+}
+
+.inbox-loading-state {
+  text-align: center;
+  margin-top: 100px;
+  color: #64748b;
+}
+
+.inbox-empty-state {
+  text-align: center;
+  margin-top: 100px;
+  background: #fff;
+  padding: 40px;
+  border-radius: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.inbox-empty-state h3 {
+  margin: 15px 0 10px;
+  color: #0b132b;
+}
+
+.inbox-empty-state p {
+  color: #64748b;
+  margin-bottom: 20px;
+}
+
+.btn-primary-inbox {
+  background: #4361EE;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.transaction-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.transaction-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+  transition: transform 0.2s;
+}
+
+.transaction-card:hover {
+  transform: translateY(-2px);
+}
+
+.tx-card-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex: 1;
+}
+
+.tx-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.tx-icon.credit { background: #ecfdf5; color: #10b981; }
+.tx-icon.debit { background: #fef2f2; color: #ef4444; }
+
+.tx-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.tx-subject {
+  margin: 0;
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.tx-snippet {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.tx-date {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+
+.tx-card-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.tx-amount-col {
+  text-align: right;
+  min-width: 100px;
+}
+
+.tx-amount {
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.tx-amount.credit { color: #10b981; }
+.tx-amount.debit { color: #1e293b; }
+
+.tx-type-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.tx-type-label.credit { color: #10b981; }
+.tx-type-label.debit { color: #ef4444; }
+
+.tx-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #f8fafc;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.tx-group-select {
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid #cbd5e1;
+  font-size: 0.8rem;
+  background: white;
+}
+
+.tx-add-btn {
+  background: #10b981;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.tx-add-btn:hover:not(:disabled) {
+  background: #059669;
+}
+
+.tx-add-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Responsive Overrides for Inbox --- */
+@media (max-width: 1024px) {
+  .transaction-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 15px;
+  }
+
+  .tx-card-right {
+    flex-direction: row;
+    justify-content: space-between;
+    padding-top: 15px;
+    border-top: 1px dashed #e2e8f0;
+    width: 100%;
+  }
+
+  .tx-actions-row {
+    flex: 1;
+    justify-content: space-between;
+  }
+
+  .btn-connect {
+    margin-right: 0 !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tx-card-right {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .tx-amount-col {
+    text-align: left;
+    min-width: 0;
+  }
+
+  .tx-actions-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .tx-group-select, .tx-add-btn {
+    width: 100%;
+  }
+}

@@ -723,3 +723,109 @@
 .btn-delete:hover {
   background: #dc2626;
 }
+
+/* --- Mobile / Tablet Overrides --- */
+.btn-signout-mobile {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .settings-dashboard-container {
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .sidebar { /* Assuming the generic Sidebar component used in Settings */
+    display: none;
+  }
+
+  .settings-top-header {
+    padding: 0 20px;
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    justify-content: flex-end; /* Push profile to right when search is hidden */
+  }
+
+  .settings-search-bar {
+    display: none; /* Hide on mobile to save space */
+  }
+
+  .settings-scrollable-area {
+    padding: 20px 15px 120px 15px; /* bottom nav space */
+    overflow-y: auto !important;
+    height: calc(100vh - 70px); /* Explicit height for scroll trigger */
+    display: block; /* Change from flex to block for standard scrolling */
+  }
+
+  .settings-container {
+    max-width: 100%;
+    margin-bottom: 50px;
+  }
+
+  .settings-header-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .shc-right {
+    width: 100%;
+    justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .shc-avatar {
+    width: 60px;
+    height: 60px;
+  }
+
+  .pi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .settings-footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+
+  .sf-right {
+    flex-direction: column;
+  }
+
+  .btn-signout-mobile {
+    display: block;
+    background: #ef4444;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 480px) {
+  .settings-user-name {
+    display: none; /* Profile image is enough */
+  }
+
+  .shc-stat .stat-value {
+    font-size: 1.1rem;
+  }
+  
+  .shc-badge {
+    font-size: 0.5rem;
+    padding: 3px 8px;
+  }
+}

@@ -138,6 +138,26 @@ function Settings({ user, onLogout }) {
     }
   };
 
+  const handleDeactivate = async () => {
+    if (window.confirm("WARNING: This will permanently delete your Splitr account and all association records. This action cannot be undone. Are you sure you want to proceed?")) {
+      try {
+        const res = await fetch(`http://localhost:5000/api/users/${user._id}`, {
+          method: "DELETE"
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("Account successfully deactivated.");
+          onLogout();
+        } else {
+          alert(data.error || "Failed to deactivate account.");
+        }
+      } catch (err) {
+        console.error("Deactivate error:", err);
+        alert("An error occurred during account deactivation.");
+      }
+    }
+  };
+
   return (
     <div className="settings-dashboard-container">
       <Sidebar activePage="settings">
@@ -341,14 +361,38 @@ function Settings({ user, onLogout }) {
                 Last login: Today at 08:42 AM from New York, US
               </div>
               <div className="sf-right">
-                <button className="btn-deactivate">DEACTIVATE ACCOUNT</button>
-                <button className="btn-delete">DELETE DATA</button>
+                <button className="btn-deactivate" onClick={handleDeactivate}>DEACTIVATE ACCOUNT</button>
+                <button className="btn-signout-mobile" onClick={onLogout}>SIGN OUT</button>
               </div>
             </div>
 
           </div>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <Link to="/dashboard" className="mobile-nav-item">
+          <span className="mobile-nav-icon">⊞</span>
+          <span>Home</span>
+        </Link>
+        <Link to="/groups" className="mobile-nav-item">
+          <span className="mobile-nav-icon">👥</span>
+          <span>Groups</span>
+        </Link>
+        <Link to="/activity" className="mobile-nav-item">
+          <span className="mobile-nav-icon">🕒</span>
+          <span>Activity</span>
+        </Link>
+        <Link to="/inbox" className="mobile-nav-item">
+          <span className="mobile-nav-icon">📥</span>
+          <span>Inbox</span>
+        </Link>
+        <Link to="/settings" className="mobile-nav-item active">
+          <span className="mobile-nav-icon">⚙️</span>
+          <span>Settings</span>
+        </Link>
+      </nav>
     </div>
   );
 }

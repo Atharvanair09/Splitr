@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ReferenceLine } from 'recharts';
 import UpiPaymentModal from "./UpiPaymentModal";
 import "./GroupDetail.css";
@@ -845,6 +845,29 @@ function GroupDetail({ user }) {
           }}
         />
       )}
+      {/* Mobile Bottom Navigation */}
+      <nav className="mobile-bottom-nav">
+        <Link to="/dashboard" className="mobile-nav-item">
+          <span className="mobile-nav-icon">⊞</span>
+          <span>Home</span>
+        </Link>
+        <Link to="/groups" className="mobile-nav-item active">
+          <span className="mobile-nav-icon">👥</span>
+          <span>Groups</span>
+        </Link>
+        <Link to="/activity" className="mobile-nav-item">
+          <span className="mobile-nav-icon">🕒</span>
+          <span>Activity</span>
+        </Link>
+        <Link to="/inbox" className="mobile-nav-item">
+          <span className="mobile-nav-icon">📥</span>
+          <span>Inbox</span>
+        </Link>
+        <Link to="/settings" className="mobile-nav-item">
+          <span className="mobile-nav-icon">⚙️</span>
+          <span>Settings</span>
+        </Link>
+      </nav>
     </div>
   );
 }

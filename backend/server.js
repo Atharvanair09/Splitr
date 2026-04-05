@@ -236,3 +236,19 @@ app.get("/api/users/friends/:userId", async (req, res) => {
   }
 });
 
+// 8. Deactivate / Delete Account
+app.delete("/api/users/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const deletedUser = await User.findByIdAndDelete(userId);
+    if (!deletedUser) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    console.log(`Account deactivated: ${deletedUser.email}`);
+    res.json({ success: true, message: "Account successfully deactivated" });
+  } catch (err) {
+    console.error("Deactivate error:", err);
+    res.status(500).json({ error: "Failed to deactivate account" });
+  }
+});
+
