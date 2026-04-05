@@ -102,6 +102,55 @@ An interactive page, where users can view the transactions, directly from their 
 
 ---
 
+### 05 · Responsive Design &nbsp;
+<!-- For side-by-side on desktop, stacked on mobile -->
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="50%">
+        <img 
+          src="assets/screens/dashboard-mobile.png" 
+          alt="Dashboard" 
+          width="100%"
+          style="border-radius: 10px;"
+        />
+        <br/><sub><b>Group Dashboard</b></sub>
+      </td>
+      <td align="center" width="50%">
+        <img 
+          src="assets/screens/add-expense-mobile.png" 
+          alt="Add Expense" 
+          width="100%"
+          style="border-radius: 10px;"
+        />
+        <br/><sub><b>Add Expense</b></sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" width="50%">
+        <img 
+          src="assets/screens/settlement-mobile.png" 
+          alt="Settlement" 
+          width="100%"
+          style="border-radius: 10px;"
+        />
+        <br/><sub><b>Settlement Page</b></sub>
+      </td>
+    </tr>
+    <tr>
+      <td align="center" colspan="2">
+        <img 
+          src="assets/screens/email-connect-mobile.png" 
+          alt="Email Connect" 
+          width="50%"
+          style="border-radius: 10px;"
+        />
+        <br/><sub><b>Email Connect</b></sub>
+      </td>
+    </tr>
+  </table>
+</div>
+
 ---
 
 ##  Unique Selling Points
