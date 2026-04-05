@@ -96,19 +96,7 @@ Add expenses in seconds. Use the structured form with category tags, or let the 
 
 ---
 
-### 03 · Expense List &nbsp;🕓
-> *Every rupee, accounted for.*
-
-A full chronological log of all group expenses. Filter by date range, category, or member to find exactly what you're looking for.
-
-<div align="center">
-  <img src="assets/screens/expense-list.png" alt="Expense List" width="80%" />
-  <!-- 📸 Replace with your actual screenshot -->
-</div>
-
----
-
-### 04 · Settlement Page &nbsp;✅
+### 03 · Settlement Page &nbsp;✅
 > *The least transactions. The most peace.*
 
 Splitr's core — an auto-generated, optimized payment plan that settles all debts in the minimum number of transactions possible. No guesswork, no overpaying.
@@ -120,14 +108,13 @@ Splitr's core — an auto-generated, optimized payment plan that settles all deb
 
 ---
 
-### 05 · Graph View &nbsp;🕸️
-> *See the debt network, visually.*
+### 04 · Email to Application connect &nbsp;🕸️
+> *See the transactions, directly from your email.*
 
-An interactive graph where nodes are group members and edges show directional debts. Understand the full financial picture of your group in one view.
+An interactive page, where users can view the transactions, directly from their email and do not need to explicitly add them to the application.
 
 <div align="center">
-  <img src="assets/screens/graph-view.png" alt="Graph View" width="80%" />
-  <!-- 📸 Replace with your actual screenshot -->
+  <img src="assets/screens/email-connect.png" alt="Email Connect" width="80%" />
 </div>
 
 ---
