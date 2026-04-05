@@ -1,9 +1,9 @@
-#  Splitr
-### *Split smarter. Settle faster. Stress less.*
-
+#  Splitr 
 <div align="center">
   <img src="assets/screens/logo.jpeg" alt="Splitr Logo" width="150" />
 </div>
+### *Split smarter. Settle faster. Stress less.*
+
 <div align="center">
   <img src="assets/screens/landing-page.jpeg" alt="Landing Page" width="80%" />
 </div>
