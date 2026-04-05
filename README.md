@@ -4,6 +4,9 @@
 <div align="center">
   <img src="assets/screens/logo.jpeg" alt="Splitr Logo" width="150" />
 </div>
+<div align="center">
+  <img src="assets/screens/landing-page.jpeg" alt="Landing Page" width="80%" />
+</div>
 
 ---
 
