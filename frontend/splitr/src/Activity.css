@@ -859,3 +859,100 @@
     box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
   }
 }
+
+/* --- Responsive Adjustments --- */
+.mobile-header-save-btn {
+  display: none; /* Desktop hidden */
+}
+
+@media (max-width: 1024px) {
+  .mobile-header-save-btn {
+    display: block;
+    background: #0b132b;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+  
+  .activity-dashboard-container {
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  .activity-sidebar {
+    display: none;
+  }
+
+  .activity-top-header {
+    padding: 0 1.5rem;
+    height: 70px;
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .activity-scrollable-area {
+    padding: 1rem;
+    padding-bottom: 90px; /* Space for bottom nav */
+  }
+
+  .activity-container {
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+    margin-top: 1rem !important;
+  }
+
+  .chat-flow-container {
+    height: 60vh !important;
+    width: 100% !important;
+  }
+
+  .expense-form-card {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 20px !important;
+  }
+
+  .chat-input-bar {
+    padding: 10px;
+  }
+
+  .upload-receipt-btn {
+    padding: 6px 10px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .epc-amount {
+    font-size: 1.8rem;
+  }
+
+  .ae-title {
+    font-size: 1.25rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .activity-top-header {
+    padding: 0 1rem;
+  }
+
+  .activity-header-left h1 {
+    display: none; /* Subtitle already explains enough */
+  }
+
+  .chat-input-bar input {
+    font-size: 0.9rem;
+  }
+
+  .ae-dist-user span {
+    font-size: 0.8rem;
+  }
+
+  .member-toggle-chip {
+    padding: 6px 10px;
+    font-size: 0.7rem;
+  }
+}

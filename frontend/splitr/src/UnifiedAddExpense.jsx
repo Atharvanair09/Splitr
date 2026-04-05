@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import './Activity.css';
 import './components/AddExpense.css';
@@ -403,9 +403,9 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
     <div className="activity-dashboard-container">
       {/* Sidebar Component */}
       <Sidebar activePage={id ? "groups" : "activity"}>
-         <button className="sidebar-btn-expense" onClick={handleSubmit} disabled={loading || !amount}>
+         {/* <button className="sidebar-btn-expense" onClick={handleSubmit} disabled={loading || !amount}>
            {loading ? "SAVING..." : "SAVE EXPENSE"}
-         </button>
+         </button> */}
       </Sidebar>
 
       {/* Main Content */}
@@ -433,6 +433,14 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
                 alt="Profile" 
               />
             </div>
+            {/* Mobile Header Save Action */}
+            <button 
+              className="mobile-header-save-btn" 
+              onClick={handleSubmit} 
+              disabled={loading || !amount}
+            >
+              {loading ? "..." : "Save"}
+            </button>
           </div>
         </header>
 
@@ -673,24 +681,40 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
               <div className="expense-fields-grid">
                 <div className="expense-field">
                   <label className="expense-label">Paid By</label>
-                  <input
-                    type="text"
+                  <select
                     className="expense-input"
-                    placeholder="Who paid?"
                     value={paidBy}
                     onChange={(e) => setPaidBy(e.target.value)}
-                  />
+                    style={{width: '100%', appearance: 'auto', padding: '10px'}}
+                  >
+                    <option value="">Paid by...</option>
+                    {groupMembers.map((m, idx) => (
+                      <option key={idx} value={m}>{m}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="expense-field">
                   <label className="expense-label">Split Between</label>
-                  <input
-                    type="text"
+                  <select
                     className="expense-input"
-                    placeholder="Names separated by comma"
-                    value={splitBetween}
-                    onChange={(e) => setSplitBetween(e.target.value)}
-                  />
+                    value=""
+                    onChange={(e) => {
+                      if (e.target.value) handleToggleMember(e.target.value);
+                      e.target.value = ""; // Reset to placeholder
+                    }}
+                    style={{width: '100%', appearance: 'auto', padding: '10px'}}
+                  >
+                    <option value="">Toggle members...</option>
+                    {groupMembers.map((m, idx) => {
+                      const isActive = memberList.some(name => name.toLowerCase() === m.toLowerCase());
+                      return (
+                        <option key={idx} value={m}>
+                          {isActive ? "✓ " : "+ "} {m}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
               </div>
 
@@ -826,8 +850,31 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
           </div>
         </div>
       </main>
-    </div>
-  );
+    {/* Mobile Bottom Navigation */}
+    <nav className="mobile-bottom-nav">
+      <Link to="/dashboard" className="mobile-nav-item">
+        <span className="mobile-nav-icon">⊞</span>
+        <span>Home</span>
+      </Link>
+      <Link to="/groups" className={`mobile-nav-item ${id ? 'active' : ''}`}>
+        <span className="mobile-nav-icon">👥</span>
+        <span>Groups</span>
+      </Link>
+      <Link to="/activity" className={`mobile-nav-item ${!id ? 'active' : ''}`}>
+        <span className="mobile-nav-icon">🕒</span>
+        <span>Activity</span>
+      </Link>
+      <Link to="/inbox" className="mobile-nav-item">
+        <span className="mobile-nav-icon">📥</span>
+        <span>Inbox</span>
+      </Link>
+      <Link to="/settings" className="mobile-nav-item">
+        <span className="mobile-nav-icon">⚙️</span>
+        <span>Settings</span>
+      </Link>
+    </nav>
+  </div>
+);
 }
 
 export default UnifiedAddExpense;
