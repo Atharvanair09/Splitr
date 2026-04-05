@@ -1,9 +1,9 @@
 # 💸 Splitr
 ### *Split smarter. Settle faster. Stress less.*
 
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Status](https://img.shields.io/badge/status-active-brightgreen.svg)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-orange.svg)
+<div align="center">
+  <img src="assets/screens/logo.jpeg" alt="Splitr Logo" width="80%" />
+</div>
 
 ---
 
@@ -102,8 +102,7 @@ Add expenses in seconds. Use the structured form with category tags, or let the 
 Splitr's core — an auto-generated, optimized payment plan that settles all debts in the minimum number of transactions possible. No guesswork, no overpaying.
 
 <div align="center">
-  <img src="assets/screens/settlement.png" alt="Settlement Page" width="80%" />
-  <!-- 📸 Replace with your actual screenshot -->
+  <img src="assets/screens/settlement.jpeg" alt="Settlement Page" width="80%" />
 </div>
 
 ---
