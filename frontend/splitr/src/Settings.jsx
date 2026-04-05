@@ -12,6 +12,10 @@ function Settings({ user, onLogout }) {
   const [searching, setSearching] = React.useState(false);
   const [error, setError] = React.useState(null);
   const [totalSpent, setTotalSpent] = React.useState(0);
+  const [phone, setPhone] = React.useState(user?.phoneNumber || "+91 91234 56789");
+  const [upiId, setUpiId] = React.useState(localStorage.getItem('private_upi_id') || "");
+  const [editingPhone, setEditingPhone] = React.useState(false);
+  const [editingUpi, setEditingUpi] = React.useState(false);
 
   // Fetch friends and requests on mount
   React.useEffect(() => {
@@ -138,6 +142,33 @@ function Settings({ user, onLogout }) {
     }
   };
 
+  const handleUpdatePhone = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/users/${user._id}/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: phone })
+      });
+      if (res.ok) {
+        alert("Phone number updated!");
+        setEditingPhone(false);
+        // Update local storage so it persists on refresh
+        const updatedUser = { ...user, phoneNumber: phone };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+    }
+  };
+
+  const handleSaveUpi = () => {
+    localStorage.setItem('private_upi_id', upiId);
+    setEditingUpi(false);
+    alert("UPI ID secured locally. No data was sent to the server.");
+  };
+
+  const maskedUpi = upiId ? upiId.replace(/^(.{2}).+(@.+)$/, "$1****$2") : "Not set";
+
   const handleDeactivate = async () => {
     if (window.confirm("WARNING: This will permanently delete your Splitr account and all association records. This action cannot be undone. Are you sure you want to proceed?")) {
       try {
@@ -243,12 +274,55 @@ function Settings({ user, onLogout }) {
                 </div>
                 <div className="pi-card pi-card-full">
                   <div className="pi-card-icon">📞</div>
-                  <div className="pi-card-content">
+                  <div className="pi-card-content" style={{flex: 1}}>
                     <label>PHONE NUMBER</label>
-                    <p>+91 91234 56789</p>
+                    {editingPhone ? (
+                      <input 
+                        type="text" 
+                        value={phone} 
+                        onChange={(e) => setPhone(e.target.value)}
+                        onBlur={handleUpdatePhone}
+                        autoFocus
+                        style={{background: 'none', border: 'none', borderBottom: '1px solid #172b7a', color: '#172b7a', fontWeight: '600', width: '100%'}}
+                      />
+                    ) : (
+                      <p>{phone}</p>
+                    )}
                   </div>
-                  <div className="pi-card-edit">✎</div>
+                  <div className="pi-card-edit" onClick={() => setEditingPhone(true)}>✎</div>
                 </div>
+              </div>
+            </div>
+
+            {/* Financial Vault (Secret) */}
+            <div className="settings-section">
+              <div className="section-header">
+                <div>
+                  <h3 style={{color: '#10b981'}}>Private Financial Vault</h3>
+                  <p>Confidential details stored only on this device. Never sent to the cloud.</p>
+                </div>
+              </div>
+              <div className="pi-card pi-card-full" style={{border: '1px dashed #10b981', background: '#f0fdf4'}}>
+                <div className="pi-card-icon">🔐</div>
+                <div className="pi-card-content" style={{flex: 1}}>
+                  <label style={{color: '#10b981'}}>SECURE UPI ID</label>
+                  {editingUpi ? (
+                    <div style={{display: 'flex', gap: '10px'}}>
+                      <input 
+                        type="text" 
+                        value={upiId} 
+                        onChange={(e) => setUpiId(e.target.value)}
+                        placeholder="e.g. arjun@upi"
+                        autoFocus
+                        style={{background: 'none', border: 'none', borderBottom: '1px solid #10b981', color: '#065f46', fontWeight: '600', width: '100%'}}
+                      />
+                      <button onClick={handleSaveUpi} style={{background: '#10b981', color: '#fff', border: 'none', padding: '4px 12px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '700'}}>SAVE</button>
+                    </div>
+                  ) : (
+                    <p style={{color: '#065f46'}}>{maskedUpi}</p>
+                  )}
+                </div>
+                <div className="pi-card-edit" onClick={() => setEditingUpi(true)}>✎</div>
               </div>
             </div>
 

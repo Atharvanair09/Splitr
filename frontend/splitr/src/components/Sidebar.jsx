@@ -7,7 +7,7 @@ function Sidebar({ activePage, children }) {
     <aside className="sidebar">
       <div className="sidebar-brand-wrapper">
         <h2 className="sidebar-brand-title">SPLITR</h2>
-        <span className="sidebar-brand-subtitle">INTELLIGENT LEDGER</span>
+        <span className="sidebar-brand-subtitle">INTELLIGENT SPLITTING</span>
       </div>
 
       <nav className="sidebar-nav-menu">

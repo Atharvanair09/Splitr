@@ -239,6 +239,25 @@ app.get("/api/users/friends/:userId", async (req, res) => {
   }
 });
 
+// 7b. Update User Profile
+app.put("/api/users/:userId/profile", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { phoneNumber } = req.body;
+    
+    const user = await User.findByIdAndUpdate(
+      userId, 
+      { phoneNumber }, 
+      { new: true }
+    );
+    
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // 8. Deactivate / Delete Account
 app.delete("/api/users/:userId", async (req, res) => {
   try {
