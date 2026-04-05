@@ -107,7 +107,7 @@ An interactive page, where users can view the transactions, directly from their 
 <div align="center">
   <table>
     <tr>
-      <td align="center" width="50%">
+      <td align="center" width="25%">
         <img 
           src="assets/screens/dashboard-mobile.png" 
           alt="Dashboard" 
@@ -116,7 +116,7 @@ An interactive page, where users can view the transactions, directly from their 
         />
         <br/><sub><b>Group Dashboard</b></sub>
       </td>
-      <td align="center" width="50%">
+      <td align="center" width="25%">
         <img 
           src="assets/screens/add-expense-mobile.png" 
           alt="Add Expense" 
@@ -127,8 +127,8 @@ An interactive page, where users can view the transactions, directly from their 
       </td>
     </tr>
     <tr>
-      <td align="center" width="50%">
-        <img 
+      <td align="center" width="25%">
+        <img  
           src="assets/screens/settlement-mobile.png" 
           alt="Settlement" 
           width="100%"
@@ -136,13 +136,11 @@ An interactive page, where users can view the transactions, directly from their 
         />
         <br/><sub><b>Settlement Page</b></sub>
       </td>
-    </tr>
-    <tr>
-      <td align="center" colspan="2">
+      <td align="center" width="25%">
         <img 
           src="assets/screens/email-connect-mobile.png" 
           alt="Email Connect" 
-          width="50%"
+          width="100%"
           style="border-radius: 10px;"
         />
         <br/><sub><b>Email Connect</b></sub>
