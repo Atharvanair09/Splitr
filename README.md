@@ -32,7 +32,7 @@ Managing group expenses is messy. Whether it's a trip with friends, a shared apa
 ##  How It Works
 
 <div align="center">
-  <img src="assets/screens/flow-diagram.png" alt="Flow Diagram" width="80%" />
+  <img src="assets/screens/flow-diagram.png" alt="Flow Diagram" width="100%" />
 </div>
 
 ---
