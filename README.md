@@ -2,7 +2,7 @@
 ### *Split smarter. Settle faster. Stress less.*
 
 <div align="center">
-  <img src="assets/screens/logo.jpeg" alt="Splitr Logo" width="80%" />
+  <img src="assets/screens/logo.jpeg" alt="Splitr Logo" width="150" />
 </div>
 
 ---
