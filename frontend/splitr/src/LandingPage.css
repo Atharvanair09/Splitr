@@ -1,0 +1,268 @@
+.landing-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+  position: relative;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Background floating blobs for a soft, natural look */
+.landing-blob-1 {
+  position: absolute;
+  top: -20%;
+  left: -10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, rgba(108, 72, 245, 0.08) 0%, rgba(108, 72, 245, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.landing-blob-2 {
+  position: absolute;
+  bottom: -10%;
+  right: -5%;
+  width: 60vw;
+  height: 60vw;
+  background: radial-gradient(circle, rgba(0, 209, 193, 0.05) 0%, rgba(0, 209, 193, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Navbar */
+.landing-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 5%;
+  position: relative;
+  z-index: 10;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.landing-brand {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.landing-brand-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-navy);
+  letter-spacing: -0.03em;
+}
+
+.landing-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.login-btn {
+  text-decoration: none;
+  color: var(--text-secondary);
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: color 0.2s;
+}
+
+.login-btn:hover {
+  color: var(--primary-navy);
+}
+
+.signup-btn-small {
+  text-decoration: none;
+  background: transparent;
+  color: var(--primary-navy);
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: 2px solid var(--primary-navy);
+  transition: all 0.2s;
+}
+
+.signup-btn-small:hover {
+  background: var(--primary-navy);
+  color: white;
+}
+
+/* Hero Section */
+.landing-hero {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 5% 0 5%;
+  position: relative;
+  z-index: 10;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 800;
+  color: var(--primary-navy);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.5rem;
+  max-width: 800px;
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  max-width: 600px;
+  margin: 0 auto 3rem auto;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.btn-cta {
+  text-decoration: none;
+  background: #4361EE;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  padding: 1rem 2.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(67, 97, 238, 0.25);
+  display: inline-block;
+  margin-bottom: 4rem;
+}
+
+.btn-cta:hover {
+  background: #3651d4;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(67, 97, 238, 0.35);
+}
+
+/* Interface Preview Area */
+.preview-container {
+  width: 100%;
+  max-width: 850px;
+  background: #ffffff;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 20px 40px rgba(11, 19, 43, 0.08);
+  border: 1px solid var(--border-color);
+  border-bottom: none;
+  padding: 2rem;
+  text-align: left;
+  display: flex;
+  gap: 2rem;
+}
+
+.preview-col {
+  flex: 1;
+}
+
+.preview-header {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Receipt Line Items */
+.receipt-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--input-bg);
+}
+
+.receipt-item .name {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.receipt-item .price {
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Breakdown Cards */
+.breakdown-card {
+  background: var(--input-bg);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #E8EDFF;
+  color: #4361EE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.breakdown-info {
+  flex: 1;
+}
+
+.person-name {
+  font-weight: 600;
+  color: var(--primary-navy);
+  margin-bottom: 2px;
+}
+
+.person-owes {
+  font-size: 0.85rem;
+  color: #EF4444;
+  font-weight: 600;
+}
+
+.person-pays {
+  font-size: 0.85rem;
+  color: #10B981;
+  font-weight: 600;
+}
+
+/* Footer */
+.landing-footer {
+  padding: 2rem 5%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--border-color);
+  background: white;
+  position: relative;
+  z-index: 10;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 2.2rem;
+  }
+  .preview-container {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+  .landing-navbar {
+    padding: 1.5rem 5%;
+  }
+}

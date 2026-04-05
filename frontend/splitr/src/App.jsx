@@ -10,6 +10,7 @@ import Account from './Account';
 import Settings from './Settings';
 import UnifiedAddExpense from './UnifiedAddExpense';
 import Inbox from './Inbox';
+import LandingPage from './LandingPage';
 
 function AuthLayout({ children }) {
   return (
@@ -80,11 +81,7 @@ function App() {
 
   return (
     <Routes>
-      <Route path="/" element={
-        <AuthLayout>
-          <Signup onNavigate={(view) => navigate(`/${view}`)} onLoginSuccess={handleLoginSuccess} />
-        </AuthLayout>
-      } />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/signup" element={
         <AuthLayout>
           <Signup onNavigate={(view) => navigate(`/${view}`)} onLoginSuccess={handleLoginSuccess} />
