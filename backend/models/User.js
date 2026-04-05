@@ -18,6 +18,13 @@ const userSchema = new mongoose.Schema({
   picture: {
     type: String
   },
+  isPremium: {
+    type: Boolean,
+    default: false
+  },
+  subscriptionDate: {
+    type: Date
+  },
   friends: [{ 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User' 

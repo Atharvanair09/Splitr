@@ -117,6 +117,99 @@ function Dashboard({ user }) {
   const location = useLocation();
   const isGroupsPage = location.pathname === '/groups';
 
+  // Subscription Logic
+  const handleTestSubscription = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/api/subscription/test-activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: user._id || user.id })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Update localStorage user object so it persists across reloads
+        const currentSavedUser = JSON.parse(localStorage.getItem('user'));
+        localStorage.setItem('user', JSON.stringify({ ...currentSavedUser, isPremium: true }));
+        alert("Test Premium Activated!");
+        window.location.reload();
+      } else {
+        alert("Failed to activate test premium.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error activating test premium.");
+    }
+  };
+
+  const handleSubscribe = async () => {
+    try {
+      // 1. Create order
+      const orderRes = await fetch("http://localhost:5000/api/subscription/create-order", {
+        method: "POST"
+      });
+      const orderData = await orderRes.json();
+
+      if (!orderRes.ok || !orderData.id) {
+        alert("Cannot initialize Razorpay checkout. Please configure valid RAZORPAY_KEY_ID in the backend or use the 'Test Premium' button instead.");
+        return;
+      }
+
+      // 2. Setup Razorpay options
+      const options = {
+        key: 'rzp_test_SZMjHxptIizsMu', // Provided in user's env vars
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: 'Splitr Premium',
+        description: 'Upgrade for AI receipt parsing',
+        order_id: orderData.id,
+        handler: async function (response) {
+          // 3. Verify Payment
+          try {
+            const verifyRes = await fetch("http://localhost:5000/api/subscription/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ userId: user._id || user.id })
+            });
+            if (verifyRes.ok) {
+              const currentSavedUser = JSON.parse(localStorage.getItem('user'));
+              localStorage.setItem('user', JSON.stringify({ ...currentSavedUser, isPremium: true }));
+              alert("Premium Activated Successfully!");
+              window.location.reload();
+            }
+          } catch(e) {
+            console.error(e);
+            alert("Verification error.");
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email
+        },
+        theme: {
+          color: '#4361EE'
+        }
+      };
+
+      // 3. Load script and open
+      const loadRazorpay = () => new Promise(resolve => {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.onload = resolve;
+        document.body.appendChild(script);
+      });
+
+      if(!window.Razorpay) {
+        await loadRazorpay();
+      }
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err) {
+      console.error("Subscription Error", err);
+      alert("Failed to initialize payment gateway.");
+    }
+  };
+
   return (
     <div className="dashboard-container">
       {/* Sidebar Component */}
@@ -179,6 +272,29 @@ function Dashboard({ user }) {
             </button> */}
 
             {/* <span style={{ fontSize: '1.2rem', color: '#64748B' }}>🔔</span> */}
+
+            {!user?.isPremium && (
+              <div style={{display: 'flex', gap: '8px', marginRight: '8px'}}>
+                <button 
+                  onClick={handleTestSubscription}
+                  style={{background: '#F1F5F9', color: '#64748B', border: '1px solid #CBD5E1', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer'}}
+                >
+                  Test Premium
+                </button>
+                <button 
+                  onClick={handleSubscribe}
+                  style={{background: 'linear-gradient(135deg, #4361EE, #00D1C1)', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', fontSize: '0.75rem', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 2px 4px rgba(67, 97, 238, 0.2)'}}
+                >
+                  💎 Get Premium
+                </button>
+              </div>
+            )}
+            
+            {user?.isPremium && (
+              <span style={{fontSize: '0.75rem', fontWeight: 'bold', color: '#00D1C1', marginRight: '8px', background: '#E0FAFA', padding: '4px 8px', borderRadius: '4px'}}>
+                💎 Premium Member
+              </span>
+            )}
 
             <div 
               className="user-profile" 

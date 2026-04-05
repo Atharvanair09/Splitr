@@ -106,6 +106,7 @@ function Inbox({ user }) {
         </header>
 
         <div className="activity-scrollable-area" style={{padding: '20px'}}>
+<<<<<<< Updated upstream
           {loading ? (
             <div className="inbox-loading-state">
               <div className="loading-spinner"></div>
@@ -113,6 +114,23 @@ function Inbox({ user }) {
             </div>
           ) : error ? (
             <div className="inbox-empty-state">
+=======
+          {!user?.isPremium && (
+            <div style={{textAlign: 'center', marginTop: '100px', background: '#fff', padding: '40px', borderRadius: '16px', border: '1px solid #e2e8f0'}}>
+              <span style={{fontSize: '3rem'}}>💎</span>
+              <h3 style={{color: '#1e293b'}}>Premium Feature</h3>
+              <p style={{color: '#64748b', marginBottom: '20px'}}>Upgrade to Splitr Premium to connect Gmail and automatically scan your email for transactions!</p>
+            </div>
+          )}
+
+          {user?.isPremium && loading ? (
+            <div style={{textAlign: 'center', marginTop: '100px'}}>
+              <div className="loading-spinner"></div>
+              <p>Scanning your emails for transactions...</p>
+            </div>
+          ) : user?.isPremium && error ? (
+            <div style={{textAlign: 'center', marginTop: '100px', background: '#fff', padding: '40px', borderRadius: '16px', border: '1px solid #e2e8f0'}}>
+>>>>>>> Stashed changes
               <span style={{fontSize: '3rem'}}>📧</span>
               <h3>No Gmail Connection</h3>
               <p>Connect your Google account to automatically detect transactions from your emails.</p>
@@ -123,14 +141,24 @@ function Inbox({ user }) {
                 Connect Gmail
               </button>
             </div>
+<<<<<<< Updated upstream
           ) : transactions.length === 0 ? (
             <div className="inbox-empty-state">
+=======
+          ) : user?.isPremium && transactions.length === 0 ? (
+            <div style={{textAlign: 'center', marginTop: '100px'}}>
+>>>>>>> Stashed changes
               <span style={{fontSize: '3rem'}}>✨</span>
               <h3>All caught up!</h3>
               <p>No new transaction emails detected in the last 24 hours.</p>
             </div>
+<<<<<<< Updated upstream
           ) : (
             <div className="transaction-list">
+=======
+          ) : user?.isPremium ? (
+            <div className="transaction-list" style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+>>>>>>> Stashed changes
               {transactions.map(tx => (
                 <div key={tx.id} className="transaction-card">
                   <div className="tx-card-left">
@@ -176,7 +204,7 @@ function Inbox({ user }) {
                 </div>
               ))}
             </div>
-          )}
+          ) : null}
         </div>
       </main>
 

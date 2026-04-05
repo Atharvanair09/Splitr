@@ -308,13 +308,26 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
   };
 
   const handleSend = () => {
+    if (!user?.isPremium) {
+      alert("Premium Feature: Upgrade to Splitr Premium to use the AI Expense Chatbot!");
+      return;
+    }
     if (!inputValue.trim()) return;
     performAICompletion(inputValue);
-    setInputValue('');
+    setInputValue("");
   };
 
-  const handleFileUpload = async (e) => {
-    const file = e.target.files[0];
+  // -------------------------------------------------------------
+  // IMAGE UPLOAD (Cloudinary -> Tesseract -> parse)
+  // -------------------------------------------------------------
+  const handleFileUpload = async (event) => {
+    if (!user?.isPremium) {
+      alert("Premium Feature: Uploading and scanning receipts is reserved for Premium members.");
+      event.target.value = ''; // Reset input
+      return;
+    }
+
+    const file = event.target.files[0];
     if (!file) return;
 
     setIsUploading(true);
@@ -451,7 +464,18 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
             <div className="chat-flow-container" style={{flex: 1, margin: 0, height: '70vh', background: '#F4F6FF', borderRadius: '16px', border: '1px solid #e2e8f0'}}>
               
               <div className="chat-messages-area" style={{paddingRight: '15px', padding: '20px'}}>
-                {messages.map((msg, index) => {
+                {!user?.isPremium ? (
+                  <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.5}}>
+                    <span style={{fontSize: '2rem'}}>🔒</span>
+                    <span style={{fontWeight: '700', marginTop: '10px', color: '#64748B'}}>Premium Feature</span>
+                    <p style={{fontSize: '0.8rem', textAlign: 'center', padding: '0 20px'}}>Upgrade to Splitr Premium to unlock the AI Chatbot and Receipt Scanner.</p>
+                  </div>
+                ) : messages.length === 0 ? (
+                  <div className="chat-placeholder">
+                    <span>🤖</span>
+                    <p>Upload a receipt or simply type:<br/>"I paid ₹1500 for drinks, Amit owes 500"</p>
+                  </div>
+                ) : messages.map((msg, index) => {
                   if (msg.role === 'bot' && msg.type === 'text') {
                     return (
                       <div key={index} className="chat-row bot-row">
@@ -579,7 +603,7 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
                   className="upload-receipt-btn"
                   title="Upload Receipt"
                   onClick={() => fileInputRef.current && fileInputRef.current.click()}
-                  disabled={isUploading || isChatLoading}
+                  disabled={isUploading || isChatLoading || !user?.isPremium}
                   style={{ 
                     marginRight: '8px', 
                     padding: '8px 12px', 
@@ -601,20 +625,25 @@ Try to map any mentioned names in the input to these specific members.` : "No gr
                   className={`chat-voice-btn ${isListening ? 'listening' : ''}`}
                   title={isListening ? "Stop Voice Input" : "Voice Input (Hackathon Mode)"}
                   onClick={toggleVoiceInput}
-                  disabled={isChatLoading || isUploading}
+                  disabled={isChatLoading || isUploading || !user?.isPremium}
                 >
                   {isListening ? '🔴' : '🎤'}
                 </button>
                 <input 
                   type="text" 
-                  placeholder={id ? `Splitting in "${id}"...` : "Type your expense..."} 
-                  value={inputValue}
+                  value={inputValue} 
                   onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  disabled={isChatLoading || isUploading}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                  placeholder={user?.isPremium ? "Message AI or upload receipt..." : "🔒 Available in Premium"}
+                  className="chat-input"
+                  disabled={!user?.isPremium}
                   style={{paddingLeft: '10px'}}
                 />
-                <button className="chat-send-btn" onClick={handleSend} disabled={isChatLoading || isUploading}>→</button>
+                <button 
+                  className="chat-send-btn" 
+                  onClick={handleSend}
+                  disabled={!inputValue.trim() || isChatLoading || isUploading || !user?.isPremium}
+                >→</button>
               </div>
 
             </div>

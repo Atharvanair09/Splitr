@@ -99,6 +99,9 @@ app.use("/expense", expenseRoutes);
 //payment routes
 app.use("/api/payment", paymentRoutes);
 
+//subscription routes
+app.use("/api/subscription", require("./routes/subscription"));
+
 // Gmail routes
 app.use("/api/auth/gmail", authRouter);
 
