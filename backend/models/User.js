@@ -25,6 +25,13 @@ const userSchema = new mongoose.Schema({
   subscriptionDate: {
     type: Date
   },
+  isTestAccount: {
+    type: Boolean,
+    default: false
+  },
+  testActivationDate: {
+    type: Date
+  },
   friends: [{ 
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User' 

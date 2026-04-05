@@ -35,7 +35,7 @@ router.post("/verify", async (req, res) => {
     // Mark user as premium
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { isPremium: true, subscriptionDate: new Date() },
+      { isPremium: true, subscriptionDate: new Date(), isTestAccount: false, testActivationDate: null },
       { new: true }
     );
 
@@ -52,10 +52,10 @@ router.post("/test-activate", async (req, res) => {
     const { userId } = req.body;
     if (!userId) return res.status(400).json({ message: "User ID required" });
 
-    // Directly mark user as premium without payment
+    // Directly mark user as premium without payment (TEST MODE)
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { isPremium: true, subscriptionDate: new Date() },
+      { isPremium: true, testActivationDate: new Date(), isTestAccount: true },
       { new: true }
     );
 

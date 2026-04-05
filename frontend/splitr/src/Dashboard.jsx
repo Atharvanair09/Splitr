@@ -128,9 +128,8 @@ function Dashboard({ user }) {
       if (res.ok) {
         const data = await res.json();
         // Update localStorage user object so it persists across reloads
-        const currentSavedUser = JSON.parse(localStorage.getItem('user'));
-        localStorage.setItem('user', JSON.stringify({ ...currentSavedUser, isPremium: true }));
-        alert("Test Premium Activated!");
+        localStorage.setItem('user', JSON.stringify(data.user));
+        alert("Test Premium Activated (Valid for 10 minutes)!");
         window.location.reload();
       } else {
         alert("Failed to activate test premium.");

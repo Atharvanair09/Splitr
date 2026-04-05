@@ -59,7 +59,23 @@ function App() {
   React.useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      let userData = JSON.parse(savedUser);
+      
+      // Enforce 10-minute test premium limit
+      if (userData.isPremium && userData.isTestAccount && userData.testActivationDate) {
+        const activationTime = new Date(userData.testActivationDate).getTime();
+        const currentTime = new Date().getTime();
+        const diffInMins = (currentTime - activationTime) / (1000 * 60);
+
+        if (diffInMins >= 10) {
+          userData.isPremium = false;
+          userData.isTestAccount = false;
+          alert("Your 10-minute Test Premium trial has expired! Please purchase a full subscription to continue using AI features.");
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
+      }
+      
+      setUser(userData);
     }
   }, []);
 
