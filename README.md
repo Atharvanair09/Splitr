@@ -1,7 +1,5 @@
-#  Splitr 
-<div align="center">
-  <img src="assets/screens/logo.jpeg" alt="Splitr Logo" width="150" />
-</div>
+# <img src="assets/screens/logo.jpeg" alt="Splitr Logo" width="50" vertical-align="middle" /> Splitr
+
 ### *Split smarter. Settle faster. Stress less.*
 
 <div align="center">
