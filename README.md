@@ -19,15 +19,12 @@ Managing group expenses is messy. Whether it's a trip with friends, a shared apa
 
 - 🔁 **Minimum Transaction Optimization** — Core algorithm that computes the least number of transactions required to settle all group balances. No more redundant payments.
 - 🤖 **AI Expense Chatbot** — Add expenses or query group balances using plain English. (e.g., *"Add ₹500 for dinner split between Raj, Priya, and me"*)
-- 📊 **Smart Spending Insights** — Weekly summaries, category breakdowns, and visual spend patterns to understand group habits at a glance.
 - 🔮 **Predictive Settlement Suggestions** — AI-driven prompts that suggest the best time and amount to settle, based on group activity.
 - ⚡ **Real-Time Collaboration** — All group members see updates instantly. No refresh needed.
 - 🧾 **Flexible Expense Input** — Add expenses manually through forms or naturally through the chatbot interface.
 - 🗂️ **Clear Dashboard Summary** — A clean overview of what you owe, what you're owed, and the group's current balance state.
 - ✅ **Optimized Settlement Plan** — A step-by-step, ready-to-execute payment plan generated automatically for your group.
-- 🕓 **Expense Timeline & Filters** — Browse expenses chronologically with filters by date, category, or member.
-- 🕸️ **Graph Visualization** — An interactive debt network graph showing directional relationships between group members.
-- 📲 **UPI Integration** *(Planned)* — Initiate settlements directly via UPI without leaving the app.
+- 📲 **UPI/Razorpay Gateway Integration** — Initiate settlements directly via UPI without leaving the app.
 
 ---
 
@@ -55,14 +52,12 @@ Settle Up ✅
 
 | Layer          | Technology            |
 |----------------|-----------------------|
-| **Frontend**   | `<!-- e.g. React.js / Next.js -->` |
-| **Backend**    | `<!-- e.g. Node.js / Express / Django -->` |
-| **Database**   | `<!-- e.g. MongoDB / PostgreSQL -->` |
-| **AI / NLP**   | `<!-- e.g. OpenAI API / Gemini -->` |
-| **Auth**       | `<!-- e.g. JWT / Firebase Auth -->` |
-| **Real-Time**  | `<!-- e.g. Socket.io / Firebase -->` |
-| **Payments**   | `<!-- UPI Integration (Planned) -->` |
-| **Hosting**    | `<!-- e.g. Vercel / Render / AWS -->` |
+| **Frontend**   | `React.js` |
+| **Backend**    | `Node.js / Express` |
+| **Database**   | `MongoDB Atlas` |
+| **AI / NLP**   | `OpenRouter API` |
+| **Auth**       | `JWT` |
+| **Payments**   | `UPI Integration along with Razorpay Gateway` |
 
 ---
 
@@ -87,7 +82,7 @@ The central hub — see total group spend, individual balances, recent activity,
 ### 02 · Add Expense &nbsp;🧾
 > *Manual form or just type it — your choice.*
 
-Add expenses in seconds. Use the structured form with category tags, or let the AI chatbot parse your natural language input like *"₹800 for groceries split between 3"*.
+Add expenses in seconds. Use the structured form with category tags, or let the AI chatbot parse your natural language input like *"₹800 for groceries split between 3" or upload a receipt.*
 
 <div align="center">
   <img src="assets/screens/add-expense.png" alt="Add Expense Page" width="80%" />
@@ -130,7 +125,6 @@ An interactive page, where users can view the transactions, directly from their 
 
 ## 🔭 Future Enhancements
 
-- [ ] 📲 **UPI Integration** — Settle debts directly within the app via UPI deep links or payment APIs
 - [ ] 📈 **Advanced Analytics** — Richer dashboards with month-over-month trends and per-category budgets
 - [ ] 📱 **Mobile App** — Native iOS and Android apps for on-the-go expense tracking
 - [ ] 🌐 **Multi-currency Support** — For international trips and cross-border groups
@@ -163,9 +157,9 @@ npm run dev        # or: python manage.py runserver
 ## 💡 Usage
 
 1. **Create an account** or log in to Splitr.
-2. **Create a group** (e.g., *"Goa Trip 2025"*) and invite members via link or email.
+2. **Create a group** (e.g., *"Goa Trip 2025"*) and invite members via link or through follow requests.
 3. **Add an expense** — type *"₹1200 for hotel split equally among 4"* in the chatbot, or use the manual form.
-4. **View your dashboard** to see live balances and who owes what.
+4. **View your group page** to see live balances and who owes what.
 5. **Go to Settlement** — Splitr generates the minimal transaction plan.
 6. **Settle up** and mark payments as done. Done. ✅
 
@@ -188,9 +182,3 @@ Please follow the existing code style and include relevant tests where applicabl
 ## 📄 License
 
 This project is licensed under the **[MIT License](LICENSE)** — feel free to use, modify, and distribute with attribution.
-
----
-
-<p align="center">
-  Built with ❤️ by <a href="https://github.com/Atharvanair09">Atharva Nair</a>
-</p>
