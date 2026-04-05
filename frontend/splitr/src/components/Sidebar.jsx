@@ -37,9 +37,9 @@ function Sidebar({ activePage, children }) {
         </Link>
       </nav>
 
-      <div className="sidebar-footer-wrapper">
+      {/* <div className="sidebar-footer-wrapper">
          {children}
-      </div>
+      </div> */}
     </aside>
   );
 }

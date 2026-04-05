@@ -140,7 +140,6 @@ function Settings({ user, onLogout }) {
 
   return (
     <div className="settings-dashboard-container">
-      {/* Sidebar Component */}
       <Sidebar activePage="settings">
         <button className="sidebar-btn-expense">GENERATE REPORT</button>
         <button className="sidebar-btn-signout" onClick={onLogout}>
@@ -148,7 +147,6 @@ function Settings({ user, onLogout }) {
         </button>
       </Sidebar>
 
-      {/* Main Content */}
       <main className="settings-main-content">
         <header className="settings-top-header">
           <div className="settings-search-bar">
@@ -156,10 +154,7 @@ function Settings({ user, onLogout }) {
             <input type="text" placeholder="Search archive..." />
           </div>
           
-          <div className="settings-header-actions">
-            <span className="header-icon">🔔</span>
-            <span className="header-icon">✂️</span>
-            
+          <div className="settings-header-actions">            
             <div className="settings-user-profile" onClick={() => navigate('/account')}>
               <span className="settings-user-name">{user?.name || "User"}</span>
               <img 
@@ -170,10 +165,8 @@ function Settings({ user, onLogout }) {
           </div>
         </header>
 
-        {/* Scrollable Settings Content */}
         <div className="settings-scrollable-area">
           <div className="settings-container">
-            {/* Header Profile Card */}
             <div className="settings-header-card">
               <div className="shc-left">
                 <div className="shc-avatar-wrapper">
@@ -341,46 +334,7 @@ function Settings({ user, onLogout }) {
                 )}
               </div>
             </div>
-
-            {/* Payment & Ledger */}
-            {/* <div className="settings-section">
-              <div className="section-header">
-                <div>
-                  <h3>Payment & Ledger</h3>
-                  <p>Connected institutions and funding sources.</p>
-                </div>
-                <button className="add-btn">+</button>
-              </div>
-              <div className="pl-list">
-                <div className="pl-list-item">
-                  <div className="pl-icon-wrapper">🏛️</div>
-                  <div className="pl-item-info">
-                    <h4>Chase Premier Savings</h4>
-                    <p>Primary Account • Ending in 4209</p>
-                  </div>
-                  <div className="pl-item-action">
-                    <span className="status-text active">ACTIVE</span>
-                    <span className="chevron">›</span>
-                  </div>
-                </div>
-                <div className="pl-list-item">
-                  <div className="pl-icon-wrapper">💳</div>
-                  <div className="pl-item-info">
-                    <h4>Indigo Business Credit</h4>
-                    <p>Reserve Card • Ending in 8812</p>
-                  </div>
-                  <div className="pl-item-action">
-                    <span className="status-text active">ACTIVE</span>
-                    <span className="chevron">›</span>
-                  </div>
-                </div>
-              </div>
-              <div className="pl-footer">
-                02 ACTIVE ACCOUNTS LINKED
-              </div>
-            </div> */}
-
-            {/* Bottom Footer Options */}
+            
             <div className="settings-footer">
               <div className="sf-left">
                 Indigo Archive v4.2.0 • Data processed by Ledger Pro Intelligence<br/>
