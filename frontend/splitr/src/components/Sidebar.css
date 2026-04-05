@@ -114,3 +114,18 @@
   gap: 8px;
   text-transform: uppercase;
 }
+
+.sidebar-btn-signout:hover {
+  color: #dc2626;
+  background-color: #fef2f2;
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Mobile specific overrides if any needed */
+}

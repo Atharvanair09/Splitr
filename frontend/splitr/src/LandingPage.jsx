@@ -57,7 +57,7 @@ function LandingPage() {
             </div>
           </div>
 
-          <div className="preview-col" style={{borderLeft: '1px solid #E2E8F0', paddingLeft: '2rem'}}>
+          <div className="preview-col preview-col-secondary">
             <div className="preview-header">2. Everyone pays their share</div>
             
             <div className="breakdown-card">

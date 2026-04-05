@@ -699,3 +699,150 @@
   border-radius: 50%;
   animation: dashSpin 0.6s linear infinite;
 }
+
+/* Responsive Overrides */
+@media (max-width: 1024px) {
+  .dashboard-container {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    display: none; /* Hide desktop sidebar */
+  }
+
+  .main-content {
+    padding: 1.5rem;
+    padding-bottom: 5rem; /* Space for bottom nav or FAB */
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .top-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .search-bar {
+    width: auto;
+    flex: 1;
+    margin-right: 1rem;
+  }
+
+  .header-actions {
+    gap: 0.8rem;
+  }
+
+  .balance-card {
+    padding: 1.5rem;
+  }
+
+  .balance-amount {
+    font-size: 2.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .balance-details {
+    gap: 1.5rem;
+  }
+
+  .detail-amount {
+    font-size: 1.2rem;
+  }
+
+  .groups-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-insight-top {
+    padding: 1.5rem;
+  }
+
+  .ai-title {
+    font-size: 1.25rem;
+  }
+
+  .fab {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 1rem;
+    padding-bottom: 5rem;
+  }
+
+  .top-header {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .search-bar {
+    order: 2;
+    width: 100%;
+    margin-right: 0;
+  }
+
+  .header-actions {
+    order: 1;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .balance-amount {
+    font-size: 1.8rem;
+  }
+}
+
+/* Mobile Bottom Navigation Bar Styles */
+.mobile-bottom-nav {
+  display: none; /* Hidden on desktop */
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 65px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  z-index: 1000;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 10px;
+  box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  color: #64748b;
+  font-size: 0.65rem;
+  font-weight: 700;
+  gap: 4px;
+  transition: all 0.2s ease;
+  flex: 1;
+}
+
+.mobile-nav-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.mobile-nav-item.active {
+  color: #0b132b;
+}
+
+.mobile-nav-item.active .mobile-nav-icon {
+  color: #4361EE;
+}
+
+@media (max-width: 1024px) {
+  .mobile-bottom-nav {
+    display: flex; /* Show on mobile/tablet */
+  }
+}

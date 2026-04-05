@@ -375,6 +375,29 @@ function Dashboard({ user }) {
         <span style={{ fontSize: '1.2rem' }}>+</span>
       </div>
 
+      <nav className="mobile-bottom-nav">
+        <Link to="/dashboard" className={`mobile-nav-item ${!isGroupsPage && location.pathname === '/dashboard' ? 'active' : ''}`}>
+          <span className="mobile-nav-icon">⊞</span>
+          <span>Home</span>
+        </Link>
+        <Link to="/groups" className={`mobile-nav-item ${isGroupsPage ? 'active' : ''}`}>
+          <span className="mobile-nav-icon">👥</span>
+          <span>Groups</span>
+        </Link>
+        <Link to="/activity" className={`mobile-nav-item ${location.pathname === '/activity' ? 'active' : ''}`}>
+          <span className="mobile-nav-icon">🕒</span>
+          <span>Activity</span>
+        </Link>
+        <Link to="/inbox" className={`mobile-nav-item ${location.pathname === '/inbox' ? 'active' : ''}`}>
+          <span className="mobile-nav-icon">📥</span>
+          <span>Inbox</span>
+        </Link>
+        <Link to="/settings" className={`mobile-nav-item ${location.pathname === '/settings' ? 'active' : ''}`}>
+          <span className="mobile-nav-icon">⚙️</span>
+          <span>Settings</span>
+        </Link>
+      </nav>
+
       <InsightsModal 
         isOpen={showInsightsModal} 
         onClose={() => setShowInsightsModal(false)}
