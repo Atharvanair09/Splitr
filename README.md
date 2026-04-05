@@ -31,21 +31,9 @@ Managing group expenses is messy. Whether it's a trip with friends, a shared apa
 
 ##  How It Works
 
-```
-Landing Page
-    ↓
-Authentication (Sign Up / Log In)
-    ↓
-Create a New Group  ──or──  Join an Existing Group
-    ↓
-Group Dashboard (View balances, members, activity)
-    ↓
-Add an Expense (Manual form or AI Chatbot)
-    ↓
-Settlement Plan Generated (Minimum transactions calculated)
-    ↓
-Settle Up 
-```
+<div align="center">
+  <img src="assets/screens/flow-diagram.jpeg" alt="Flow Diagram" width="80%" />
+</div>
 
 ---
 
