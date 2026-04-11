@@ -115,12 +115,16 @@ function Inbox({ user }) {
           )}
 
           {user?.isPremium && loading ? (
-            <div style={{textAlign: 'center', marginTop: '100px'}}>
+            <div className="inbox-loading-state">
               <div className="loading-spinner"></div>
               <p>Scanning your emails for transactions...</p>
             </div>
           ) : user?.isPremium && error ? (
+<<<<<<< Updated upstream
             <div style={{textAlign: 'center', marginTop: '100px', background: '#fff', padding: '40px', borderRadius: '16px', border: '1px solid #e2e8f0'}}>
+=======
+            <div className="inbox-empty-state">
+>>>>>>> Stashed changes
               <span style={{fontSize: '3rem'}}>📧</span>
               <h3>No Gmail Connection</h3>
               <p>Connect your Google account to automatically detect transactions from your emails.</p>
@@ -132,13 +136,21 @@ function Inbox({ user }) {
               </button>
             </div>
           ) : user?.isPremium && transactions.length === 0 ? (
+<<<<<<< Updated upstream
             <div style={{textAlign: 'center', marginTop: '100px'}}>
+=======
+            <div className="inbox-empty-state">
+>>>>>>> Stashed changes
               <span style={{fontSize: '3rem'}}>✨</span>
               <h3>All caught up!</h3>
               <p>No new transaction emails detected in the last 24 hours.</p>
             </div>
           ) : user?.isPremium ? (
+<<<<<<< Updated upstream
             <div className="transaction-list" style={{display: 'flex', flexDirection: 'column', gap: '15px'}}>
+=======
+            <div className="transaction-list">
+>>>>>>> Stashed changes
               {transactions.map(tx => (
                 <div key={tx.id} className="transaction-card">
                   <div className="tx-card-left">

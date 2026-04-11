@@ -48,6 +48,9 @@ function GroupDetail({ user }) {
   const [loading, setLoading] = useState(true);
   const [settling, setSettling] = useState(null); // track which pair is settling
   const [upiTarget, setUpiTarget] = useState(null); // {from, to, amount} for UPI modal
+  const [expenseToEdit, setExpenseToEdit] = useState(null);
+  const [editForm, setEditForm] = useState({ amount: '', paidBy: '', splitBetween: '', notes: '' });
+  const [isEditingSubmit, setIsEditingSubmit] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -292,6 +295,63 @@ function GroupDetail({ user }) {
 
 
   // Total group spend
+  const handleDeleteExpense = async (expenseId) => {
+    if (window.confirm("Are you sure you want to delete this expense?")) {
+      try {
+        const res = await fetch(`http://localhost:5000/expense/delete/${expenseId}`, { method: 'DELETE' });
+        if (res.ok) {
+           const expensesRes = await fetch(`http://localhost:5000/expense/group/${id}`);
+           const expensesData = await expensesRes.json();
+           setExpenses(expensesData);
+        } else {
+           alert("Failed to delete expense");
+        }
+      } catch (err) {
+        console.error("Delete error:", err);
+      }
+    }
+  };
+
+  const handleEditClick = (expense) => {
+    setExpenseToEdit(expense);
+    setEditForm({
+      amount: expense.amount,
+      paidBy: expense.paidBy,
+      splitBetween: expense.splitBetween.join(", "),
+      notes: expense.notes || "",
+    });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setIsEditingSubmit(true);
+    try {
+      const payload = {
+        amount: parseFloat(editForm.amount),
+        paidBy: editForm.paidBy.trim(),
+        splitBetween: editForm.splitBetween.split(",").map(s => s.trim()).filter(s => s),
+        notes: editForm.notes
+      };
+      const res = await fetch(`http://localhost:5000/expense/edit/${expenseToEdit._id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+         setExpenseToEdit(null);
+         const expensesRes = await fetch(`http://localhost:5000/expense/group/${id}`);
+         const expensesData = await expensesRes.json();
+         setExpenses(expensesData);
+      } else {
+         alert("Failed to update expense");
+      }
+    } catch (err) {
+      console.error("Edit error:", err);
+    } finally {
+      setIsEditingSubmit(false);
+    }
+  };
+
   // Handle Delete Group
   const handleDeleteGroup = async () => {
     if (window.confirm("Are you sure you want to delete this group? This will remove all associated expenses and cannot be undone.")) {
@@ -783,7 +843,15 @@ function GroupDetail({ user }) {
             ) : (
               <div className="gd-expense-list">
                 {expenses.map((expense) => (
-                  <div key={expense._id} className="gd-expense-item">
+                  <div key={expense._id} className="gd-expense-item" style={{position: 'relative'}}>
+                    
+                    {/* Edited Badge */}
+                    {expense.isEdited && (
+                      <div style={{ position: 'absolute', top: '-10px', left: '16px', background: '#F59E0B', color: '#fff', fontSize: '0.65rem', fontWeight: '800', padding: '2px 8px', borderRadius: '10px', letterSpacing: '0.05em', textTransform: 'uppercase', boxShadow: '0 2px 4px rgba(245, 158, 11, 0.3)' }}>
+                        Edited
+                      </div>
+                    )}
+
                     <div className="gd-expense-top">
                       <div className="gd-expense-payer">
                         <div className="gd-expense-payer-avatar">
@@ -820,6 +888,16 @@ function GroupDetail({ user }) {
                         </span>
                       </div>
                     )}
+
+                    {/* Action Buttons Row */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
+                       <button onClick={() => handleEditClick(expense)} style={{ background: '#f8fafc', border: '1px solid #cbd5e1', cursor: 'pointer', color: '#475569', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }} title="Edit Expense">
+                         ✏️ Edit
+                       </button>
+                       <button onClick={() => handleDeleteExpense(expense._id)} style={{ background: '#fef2f2', border: '1px solid #fecaca', cursor: 'pointer', color: '#ef4444', padding: '6px 12px', borderRadius: '6px', fontSize: '0.8rem', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s' }} title="Delete Expense">
+                         🗑️ Delete
+                       </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -827,6 +905,39 @@ function GroupDetail({ user }) {
           </div>
         </div>
       </div>
+
+      {/* Edit Expense Modal */}
+      {expenseToEdit && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.4)', backdropFilter: 'blur(4px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#fff', padding: '24px', borderRadius: '16px', width: '90%', maxWidth: '400px', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+            <h3 style={{ marginTop: 0, color: '#1e293b', fontSize: '1.25rem' }}>Edit Expense</h3>
+            <form onSubmit={handleEditSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '20px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', marginBottom: '6px' }}>Amount (₹)</label>
+                <input type="number" value={editForm.amount} onChange={e => setEditForm({...editForm, amount: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem', boxSizing: 'border-box' }} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', marginBottom: '6px' }}>Paid By</label>
+                <input type="text" value={editForm.paidBy} onChange={e => setEditForm({...editForm, paidBy: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem', boxSizing: 'border-box' }} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', marginBottom: '6px' }}>Split Between (comma separated)</label>
+                <input type="text" value={editForm.splitBetween} onChange={e => setEditForm({...editForm, splitBetween: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem', boxSizing: 'border-box' }} required />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, color: '#64748b', marginBottom: '6px' }}>Notes</label>
+                <input type="text" value={editForm.notes} onChange={e => setEditForm({...editForm, notes: e.target.value})} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '1rem', boxSizing: 'border-box' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '8px' }}>
+                <button type="button" onClick={() => setExpenseToEdit(null)} style={{ padding: '10px 16px', background: 'transparent', border: 'none', color: '#64748b', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+                <button type="submit" disabled={isEditingSubmit} style={{ padding: '10px 20px', background: '#4361EE', border: 'none', color: '#fff', borderRadius: '8px', fontWeight: 600, cursor: 'pointer' }}>
+                  {isEditingSubmit ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* UPI Payment Modal */}
       {upiTarget && (

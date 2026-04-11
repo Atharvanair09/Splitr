@@ -25,6 +25,49 @@ router.post("/add", async (req, res) => {
   }
 });
 
+// Edit an expense
+router.put("/edit/:expenseId", async (req, res) => {
+  try {
+    const { amount, paidBy, splitBetween, splitDetails, notes } = req.body;
+    
+    const updatedExpense = await Expense.findByIdAndUpdate(
+      req.params.expenseId,
+      {
+        amount,
+        paidBy,
+        splitBetween,
+        splitDetails,
+        notes,
+        isEdited: true
+      },
+      { new: true }
+    );
+
+    if (!updatedExpense) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+
+    res.json(updatedExpense);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to edit expense" });
+  }
+});
+
+// Delete an expense
+router.delete("/delete/:expenseId", async (req, res) => {
+  try {
+    const deletedExpense = await Expense.findByIdAndDelete(req.params.expenseId);
+    
+    if (!deletedExpense) {
+      return res.status(404).json({ error: "Expense not found" });
+    }
+
+    res.json({ success: true, message: "Expense deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete expense" });
+  }
+});
+
 // Get all expenses for a group
 router.get("/group/:groupId", async (req, res) => {
   try {

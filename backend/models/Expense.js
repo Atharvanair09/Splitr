@@ -31,6 +31,10 @@ const expenseSchema = new mongoose.Schema({
   gmailMessageId: {
     type: String,
   },
+  isEdited: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Expense", expenseSchema);
